@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,21 +17,22 @@ const Navigation = () => {
   }, []);
 
   const navItems = [
-    { label: "Home", href: "#home" },
-    { label: "About", href: "#about" },
-    { label: "Events", href: "#events" },
-    { label: "Team", href: "#team" },
-    { label: "Resources", href: "#resources" },
-    { label: "Contact", href: "#contact" },
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
+    { label: "Events", href: "/events" },
+    { label: "Team", href: "/team" },
+    { label: "Blog", href: "/blog" },
   ];
 
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href);
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
       setIsMobileMenuOpen(false);
     }
   };
+
+  const isHomePage = location.pathname === "/";
 
   return (
     <nav
@@ -54,20 +57,28 @@ const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <button
+              <Link
                 key={item.label}
-                onClick={() => scrollToSection(item.href)}
+                to={item.href}
                 className="text-foreground hover:text-primary transition-colors font-medium"
               >
                 {item.label}
-              </button>
+              </Link>
             ))}
-            <Button
-              onClick={() => scrollToSection("#contact")}
-              className="bg-gradient-primary hover:opacity-90"
-            >
-              Join Us
-            </Button>
+            {isHomePage ? (
+              <Button
+                onClick={() => scrollToSection("contact")}
+                className="bg-gradient-primary hover:opacity-90"
+              >
+                Join Us
+              </Button>
+            ) : (
+              <Link to="/#contact">
+                <Button className="bg-gradient-primary hover:opacity-90">
+                  Join Us
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -83,21 +94,36 @@ const Navigation = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 bg-card rounded-lg mt-2 shadow-xl">
             {navItems.map((item) => (
-              <button
+              <Link
                 key={item.label}
-                onClick={() => scrollToSection(item.href)}
+                to={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="block w-full text-left px-4 py-3 text-foreground hover:bg-muted transition-colors"
               >
                 {item.label}
-              </button>
+              </Link>
             ))}
             <div className="px-4 pt-2">
-              <Button
-                onClick={() => scrollToSection("#contact")}
-                className="w-full bg-gradient-primary hover:opacity-90"
-              >
-                Join Us
-              </Button>
+              {isHomePage ? (
+                <Button
+                  onClick={() => {
+                    scrollToSection("contact");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-gradient-primary hover:opacity-90"
+                >
+                  Join Us
+                </Button>
+              ) : (
+                <Link to="/#contact">
+                  <Button 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full bg-gradient-primary hover:opacity-90"
+                  >
+                    Join Us
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         )}
