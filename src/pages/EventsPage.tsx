@@ -91,16 +91,50 @@ const EventsPage = () => {
     <div className="min-h-screen">
       <Navigation />
       
-      <section className="pt-32 pb-20 bg-gradient-hero">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16 animate-fade-in">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Our <span className="text-primary">Events</span>
+      <section className="relative pt-32 pb-24 overflow-hidden bg-gradient-to-br from-background via-primary/5 to-background">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20 w-40 h-40 border-2 border-primary rounded-full animate-float" />
+          <div className="absolute bottom-32 right-32 w-60 h-60 border-2 border-accent rounded-full animate-float" style={{ animationDelay: "1s" }} />
+          <div className="absolute top-1/2 left-1/3 w-32 h-32 border-2 border-primary rounded-full animate-float" style={{ animationDelay: "2s" }} />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto text-center animate-fade-in">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6 border border-primary/20">
+              <Calendar className="w-4 h-4 animate-float" />
+              <span className="text-sm font-medium">Upcoming & Past Events</span>
+            </div>
+            
+            <h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
+              Shape Your
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary animate-glow">
+                Future Today
+              </span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Join us for workshops, seminars, hackathons, and hands-on sessions designed to 
-              enhance your bioinformatics skills and connect you with the community.
+            
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+              Join workshops, seminars, and hackathons designed to enhance your bioinformatics 
+              skills and connect you with innovators.
             </p>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+              <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-primary/10 hover:border-primary/30 transition-all hover:scale-105">
+                <div className="text-3xl font-bold text-primary mb-1">50+</div>
+                <div className="text-sm text-muted-foreground">Events Held</div>
+              </div>
+              <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-primary/10 hover:border-primary/30 transition-all hover:scale-105">
+                <div className="text-3xl font-bold text-primary mb-1">1000+</div>
+                <div className="text-sm text-muted-foreground">Participants</div>
+              </div>
+              <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-primary/10 hover:border-primary/30 transition-all hover:scale-105">
+                <div className="text-3xl font-bold text-primary mb-1">30+</div>
+                <div className="text-sm text-muted-foreground">Workshops</div>
+              </div>
+              <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-primary/10 hover:border-primary/30 transition-all hover:scale-105">
+                <div className="text-3xl font-bold text-primary mb-1">15+</div>
+                <div className="text-sm text-muted-foreground">Speakers</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

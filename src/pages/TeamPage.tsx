@@ -1,6 +1,7 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Facebook, Linkedin, Mail, Award, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -85,16 +86,62 @@ const TeamPage = () => {
     <div className="min-h-screen">
       <Navigation />
       
-      <section className="pt-32 pb-20 bg-gradient-hero">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16 animate-fade-in">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Our <span className="text-primary">Team</span>
+      <section className="relative pt-32 pb-28 overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-20 animate-float" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl opacity-20 animate-float" style={{ animationDelay: "3s" }} />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center max-w-4xl mx-auto animate-fade-in">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="flex -space-x-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border-2 border-background shadow-lg">
+                  <Users className="w-5 h-5 text-white" />
+                </div>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center border-2 border-background shadow-lg">
+                  <Award className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <Badge className="bg-primary/10 text-primary border-primary/20">
+                Meet Our Team
+              </Badge>
+            </div>
+            
+            <h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
+              Driven by
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary animate-glow">
+                Passion & Purpose
+              </span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Meet the passionate individuals driving our club forward. Our team consists of 
-              dedicated students and experienced faculty committed to advancing bioinformatics education.
+            
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+              Meet the passionate individuals driving our club forward. Dedicated students and 
+              experienced faculty committed to advancing bioinformatics education at PSTU.
             </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-primary animate-float" />
+                </div>
+                <div className="text-left">
+                  <div className="font-bold text-lg">150+</div>
+                  <div className="text-muted-foreground text-xs">Team Members</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+                  <Award className="w-6 h-6 text-accent animate-float" style={{ animationDelay: "1s" }} />
+                </div>
+                <div className="text-left">
+                  <div className="font-bold text-lg">25+</div>
+                  <div className="text-muted-foreground text-xs">Award Winners</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

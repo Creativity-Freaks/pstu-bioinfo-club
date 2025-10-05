@@ -2,6 +2,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Brain, Code, Database, Users, Target, Lightbulb, Award, Rocket, BookOpen, FlaskConical } from "lucide-react";
 
 const AboutPage = () => {
@@ -32,32 +33,58 @@ const AboutPage = () => {
     <div className="min-h-screen">
       <Navigation />
       
-      <section className="pt-32 pb-20 bg-gradient-hero">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16 animate-fade-in">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              About <span className="text-primary">Us</span>
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Empowering students to explore the intersection of biology, computer science, 
-              and data analysis through hands-on learning and cutting-edge research.
-            </p>
-          </div>
+      <section className="relative pt-32 pb-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+        <div className="absolute top-20 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 left-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="animate-fade-in">
+                <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+                  Who We Are
+                </Badge>
+                <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                  Pioneers in
+                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary animate-glow">
+                    Bioinformatics
+                  </span>
+                </h1>
+                <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                  Empowering students to explore the intersection of biology, computer science, 
+                  and data analysis through hands-on learning and cutting-edge research at PSTU.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                    <span className="text-sm font-medium">150+ Active Members</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-accent rounded-full animate-pulse" style={{ animationDelay: "0.5s" }} />
+                    <span className="text-sm font-medium">50+ Research Projects</span>
+                  </div>
+                </div>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            {features.map((feature, index) => (
-              <Card
-                key={index}
-                className="bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-t-4 border-t-primary animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <CardContent className="p-6 text-center">
-                  <feature.icon className="w-12 h-12 mx-auto mb-4 text-primary animate-float" />
-                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+              <div className="grid grid-cols-2 gap-4 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+                {features.map((feature, index) => (
+                  <Card
+                    key={index}
+                    className="bg-card/80 backdrop-blur-sm hover:shadow-elegant transition-all duration-500 hover:-translate-y-2 border-0 group cursor-pointer"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <CardContent className="p-6 text-center">
+                      <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <feature.icon className="w-7 h-7 text-primary group-hover:animate-float" />
+                      </div>
+                      <h3 className="text-base font-bold mb-1 group-hover:text-primary transition-colors">{feature.title}</h3>
+                      <p className="text-xs text-muted-foreground">{feature.description}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>

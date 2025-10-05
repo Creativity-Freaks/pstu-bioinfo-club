@@ -106,16 +106,49 @@ const BlogPage = () => {
     <div className="min-h-screen">
       <Navigation />
       
-      <section className="pt-32 pb-20 bg-gradient-hero">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16 animate-fade-in">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Our <span className="text-primary">Blog</span>
+      <section className="relative pt-32 pb-24 overflow-hidden bg-gradient-to-b from-muted/50 to-background">
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-32 left-10 text-8xl animate-float">📚</div>
+          <div className="absolute top-48 right-20 text-6xl animate-float" style={{ animationDelay: "1s" }}>🧬</div>
+          <div className="absolute bottom-20 left-1/4 text-7xl animate-float" style={{ animationDelay: "2s" }}>💡</div>
+          <div className="absolute top-1/3 right-1/4 text-5xl animate-float" style={{ animationDelay: "3s" }}>🔬</div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto text-center animate-fade-in">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/10 to-accent/10 px-5 py-2 rounded-full mb-6 border border-primary/20">
+              <BookOpen className="w-4 h-4 text-primary animate-float" />
+              <span className="text-sm font-medium text-primary">Insights & Knowledge</span>
+            </div>
+            
+            <h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
+              Learn, Grow,
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary animate-glow">
+                Innovate
+              </span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Insights, tutorials, and updates from the world of bioinformatics. 
-              Written by our team members and guest contributors.
+            
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+              Explore insights, tutorials, and cutting-edge updates from the world of bioinformatics, 
+              written by experts and innovators.
             </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-8">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-primary mb-1">50+</div>
+                <div className="text-sm text-muted-foreground">Articles Published</div>
+              </div>
+              <div className="w-px h-12 bg-border" />
+              <div className="text-center">
+                <div className="text-4xl font-bold text-primary mb-1">10K+</div>
+                <div className="text-sm text-muted-foreground">Monthly Readers</div>
+              </div>
+              <div className="w-px h-12 bg-border" />
+              <div className="text-center">
+                <div className="text-4xl font-bold text-primary mb-1">15+</div>
+                <div className="text-sm text-muted-foreground">Contributors</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
