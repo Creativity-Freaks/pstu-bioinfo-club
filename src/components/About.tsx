@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Brain, Code, Database, Users, Target, Lightbulb, Award, Rocket, BookOpen, FlaskConical } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Brain, Code, Database, Users, Target, Lightbulb, Award, Rocket, BookOpen, FlaskConical, ChevronDown } from "lucide-react";
 
 const About = () => {
   const features = [
@@ -26,9 +27,17 @@ const About = () => {
     }
   ];
 
+  const scrollToDetails = () => {
+    const detailsSection = document.getElementById('about-details');
+    if (detailsSection) {
+      detailsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <section id="about" className="py-20 bg-muted">
       <div className="container mx-auto px-4">
+        {/* Brief Overview Section */}
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             About Our <span className="text-primary">Club</span>
@@ -39,7 +48,7 @@ const About = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {features.map((feature, index) => (
             <Card
               key={index}
@@ -57,7 +66,20 @@ const About = () => {
           ))}
         </div>
 
-        <div className="bg-card rounded-2xl p-8 md:p-12 shadow-xl">
+        {/* Explore More Button */}
+        <div className="text-center mb-20">
+          <Button 
+            size="lg" 
+            onClick={scrollToDetails}
+            className="group bg-gradient-primary text-white hover:shadow-xl transition-all duration-300"
+          >
+            Explore More Details
+            <ChevronDown className="ml-2 w-5 h-5 group-hover:translate-y-1 transition-transform" />
+          </Button>
+        </div>
+
+        {/* Detailed Tabs Section */}
+        <div id="about-details" className="bg-card rounded-2xl p-8 md:p-12 shadow-xl scroll-mt-20">
           <Tabs defaultValue="mission" className="w-full">
             <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-8 h-auto">
               <TabsTrigger value="mission" className="flex items-center gap-2 py-3">
