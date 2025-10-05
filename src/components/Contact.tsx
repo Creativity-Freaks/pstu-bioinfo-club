@@ -24,7 +24,7 @@ const Contact = () => {
 
         <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Form */}
-          <Card className="shadow-xl animate-fade-in">
+          <Card className="shadow-elegant hover:shadow-glow transition-all duration-500 animate-fade-in border-t-4 border-t-primary">
             <CardContent className="p-8">
               <h3 className="text-2xl font-bold mb-6">Send us a Message</h3>
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -57,7 +57,7 @@ const Contact = () => {
                     className="w-full min-h-[120px]"
                   />
                 </div>
-                <Button type="submit" className="w-full bg-gradient-primary hover:opacity-90" size="lg">
+                <Button type="submit" className="w-full bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-elegant hover:shadow-glow" size="lg">
                   Send Message
                 </Button>
               </form>
@@ -66,7 +66,7 @@ const Contact = () => {
 
           {/* Contact Information */}
           <div className="space-y-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <Card className="bg-gradient-primary text-white border-0 shadow-xl">
+            <Card className="bg-gradient-primary text-white border-0 shadow-elegant hover:shadow-glow transition-all duration-500">
               <CardContent className="p-8">
                 <h3 className="text-2xl font-bold mb-6">Contact Information</h3>
                 <div className="space-y-4">
@@ -102,7 +102,7 @@ const Contact = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg">
+            <Card className="shadow-elegant hover:shadow-glow transition-all duration-500 border-t-4 border-t-accent">
               <CardContent className="p-8">
                 <h3 className="text-2xl font-bold mb-6">Follow Us</h3>
                 <div className="space-y-4">
@@ -110,9 +110,9 @@ const Contact = () => {
                     href="https://www.facebook.com/profile.php?id=61577988400909"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center space-x-4 p-4 rounded-lg bg-muted hover:bg-muted/70 transition-colors"
+                    className="flex items-center space-x-4 p-4 rounded-lg bg-muted hover:bg-primary/10 hover:border-primary/30 border border-transparent transition-all duration-300 hover:scale-105 group"
                   >
-                    <Facebook className="w-6 h-6 text-primary" />
+                    <Facebook className="w-6 h-6 text-primary group-hover:scale-125 transition-transform" />
                     <span className="font-medium">Facebook Page</span>
                   </a>
                   <div className="bg-gradient-to-br from-accent/10 to-secondary/10 p-6 rounded-lg border border-accent/20">

@@ -43,13 +43,15 @@ const AboutPreview = () => {
           {features.map((feature, index) => (
             <Card
               key={index}
-              className="hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-t-4 border-t-primary animate-fade-in"
+              className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 animate-fade-in group border-t-4 border-t-primary/50 hover:border-t-primary cursor-pointer"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardContent className="p-6 text-center">
-                <feature.icon className="w-12 h-12 mx-auto mb-4 text-primary animate-float" />
-                <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
+                  <feature.icon className="w-12 h-12 text-primary-foreground group-hover:animate-float" />
+                </div>
+                <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{feature.title}</h3>
+                <p className="text-muted-foreground group-hover:text-foreground transition-colors">{feature.description}</p>
               </CardContent>
             </Card>
           ))}
@@ -57,9 +59,9 @@ const AboutPreview = () => {
 
         <div className="text-center">
           <Link to="/about">
-            <Button size="lg" className="bg-gradient-primary group">
+            <Button size="lg" className="bg-gradient-primary hover:scale-110 transition-all duration-300 shadow-elegant hover:shadow-glow group">
               Learn More About Us
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
             </Button>
           </Link>
         </div>

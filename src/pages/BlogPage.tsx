@@ -145,10 +145,10 @@ const BlogPage = () => {
             <p className="text-muted-foreground">Our latest and most popular article</p>
           </div>
 
-          <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 border-t-4 border-t-primary">
+          <Card className="overflow-hidden hover:shadow-elegant border-t-4 border-t-primary animate-fade-in transition-all duration-500 group">
             <div className="grid md:grid-cols-2">
-              <div className="bg-gradient-primary flex items-center justify-center p-12">
-                <span className="text-9xl">{blogPosts[0].image}</span>
+              <div className="bg-gradient-primary flex items-center justify-center p-12 group-hover:scale-105 transition-transform duration-500">
+                <span className="text-9xl animate-float">{blogPosts[0].image}</span>
               </div>
               <CardContent className="p-8 flex flex-col justify-center">
                 <div className="flex items-center gap-3 mb-4">
@@ -167,9 +167,9 @@ const BlogPage = () => {
                     {blogPosts[0].date}
                   </div>
                 </div>
-                <Button className="w-fit bg-gradient-primary group">
+                <Button className="w-fit bg-gradient-primary hover:scale-110 transition-all duration-300 shadow-elegant hover:shadow-glow group">
                   Read Article
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-2 transition-transform" />
                 </Button>
               </CardContent>
             </div>
@@ -189,7 +189,7 @@ const BlogPage = () => {
             {blogPosts.slice(1).map((post, index) => (
               <Card
                 key={index}
-                className="hover:shadow-xl transition-all duration-300 hover:-translate-y-2 animate-fade-in"
+                className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 animate-fade-in group border-t-4 border-t-primary/50 hover:border-t-primary cursor-pointer"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardHeader>

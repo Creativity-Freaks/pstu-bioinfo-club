@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Dna } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MembershipForm from "@/components/MembershipForm";
 
@@ -38,20 +38,20 @@ const Navigation = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled
-          ? "bg-background/95 backdrop-blur-md shadow-lg"
+          ? "bg-background/95 backdrop-blur-md shadow-elegant border-b border-border/50"
           : "bg-transparent"
       }`}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center">
-              <span className="text-2xl font-bold text-primary-foreground">BC</span>
+          <div className="flex items-center space-x-3 group cursor-pointer">
+            <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
+              <Dna className="w-6 h-6 text-primary-foreground animate-pulse" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Bioinformatics Club</h1>
+              <h1 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Bioinformatics Club</h1>
               <p className="text-xs text-muted-foreground">PSTU</p>
             </div>
           </div>
@@ -62,14 +62,15 @@ const Navigation = () => {
               <Link
                 key={item.label}
                 to={item.href}
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                className="text-foreground hover:text-primary transition-all duration-300 font-medium relative group"
               >
                 {item.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-primary group-hover:w-full transition-all duration-300"></span>
               </Link>
             ))}
             <Button
               onClick={() => setIsMembershipFormOpen(true)}
-              className="bg-gradient-primary hover:opacity-90"
+              className="bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-glow"
             >
               Join Us
             </Button>
@@ -86,13 +87,13 @@ const Navigation = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 bg-card rounded-lg mt-2 shadow-xl">
+          <div className="md:hidden py-4 bg-card/95 backdrop-blur-lg rounded-lg mt-2 shadow-elegant border border-border animate-fade-in">
             {navItems.map((item) => (
               <Link
                 key={item.label}
                 to={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block w-full text-left px-4 py-3 text-foreground hover:bg-muted transition-colors"
+                className="block w-full text-left px-4 py-3 text-foreground hover:bg-muted hover:text-primary transition-all duration-300 rounded-lg mx-2"
               >
                 {item.label}
               </Link>
@@ -103,7 +104,7 @@ const Navigation = () => {
                   setIsMembershipFormOpen(true);
                   setIsMobileMenuOpen(false);
                 }}
-                className="w-full bg-gradient-primary hover:opacity-90"
+                className="w-full bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300"
               >
                 Join Us
               </Button>

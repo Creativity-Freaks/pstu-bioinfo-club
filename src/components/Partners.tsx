@@ -47,16 +47,16 @@ const Partners = () => {
             return (
               <Card
                 key={index}
-                className="hover:shadow-xl transition-all duration-300 hover:-translate-y-2 animate-fade-in"
+                className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 animate-fade-in group border-t-4 border-t-primary/50 hover:border-t-primary cursor-pointer"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center">
-                    <Icon className="w-8 h-8 text-primary-foreground" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
+                    <Icon className="w-8 h-8 text-primary-foreground group-hover:animate-float" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2">{partner.name}</h3>
-                  <p className="text-sm text-primary font-medium mb-3">{partner.type}</p>
-                  <p className="text-sm text-muted-foreground">{partner.description}</p>
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{partner.name}</h3>
+                  <p className="text-sm text-primary font-medium mb-3 group-hover:scale-105 transition-transform">{partner.type}</p>
+                  <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{partner.description}</p>
                 </CardContent>
               </Card>
             );

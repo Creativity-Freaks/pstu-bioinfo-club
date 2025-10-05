@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { UserPlus, Sparkles } from "lucide-react";
 
 interface MembershipFormProps {
   open: boolean;
@@ -52,10 +53,16 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto animate-fade-in">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Join PSTU Bioinformatics Club</DialogTitle>
-          <DialogDescription>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
+              <UserPlus className="w-5 h-5 text-white" />
+            </div>
+            <DialogTitle className="text-2xl">Join PSTU Bioinformatics Club</DialogTitle>
+          </div>
+          <DialogDescription className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-accent" />
             Fill out this form to apply for membership. We welcome all passionate students!
           </DialogDescription>
         </DialogHeader>
@@ -175,13 +182,14 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button type="submit" className="flex-1 bg-gradient-primary">
+            <Button type="submit" className="flex-1 bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-elegant hover:shadow-glow">
               Submit Application
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              className="hover:bg-muted"
             >
               Cancel
             </Button>

@@ -121,18 +121,18 @@ const EventsPage = () => {
             {upcomingEvents.map((event, index) => (
               <Card
                 key={index}
-                className="hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-t-4 border-t-primary animate-fade-in"
+                className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 border-t-4 border-t-primary/50 hover:border-t-primary animate-fade-in group"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between mb-3">
-                    <Badge className="bg-accent text-accent-foreground text-sm">{event.type}</Badge>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Users2 className="w-4 h-4 mr-1" />
+                    <Badge className="bg-accent text-accent-foreground text-sm group-hover:scale-110 transition-transform">{event.type}</Badge>
+                    <div className="flex items-center text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                      <Users2 className="w-4 h-4 mr-1 group-hover:animate-float" />
                       {event.attendees} seats
                     </div>
                   </div>
-                  <CardTitle className="text-2xl mb-2">{event.title}</CardTitle>
+                  <CardTitle className="text-2xl mb-2 group-hover:text-primary transition-colors">{event.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-muted-foreground">{event.description}</p>
@@ -163,8 +163,9 @@ const EventsPage = () => {
                     </div>
                   </div>
 
-                  <Button className="w-full bg-gradient-primary">
+                  <Button className="w-full bg-gradient-primary hover:scale-105 transition-all duration-300 shadow-elegant hover:shadow-glow group">
                     Register Now
+                    <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
                   </Button>
                 </CardContent>
               </Card>
@@ -189,22 +190,22 @@ const EventsPage = () => {
             {pastEvents.map((event, index) => (
               <Card
                 key={index}
-                className="hover:shadow-lg transition-all duration-300 animate-fade-in"
+                className="hover:shadow-elegant transition-all duration-500 animate-fade-in group border-l-4 border-l-primary/50 hover:border-l-primary cursor-pointer"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-3">
-                    <Badge variant="outline">{event.date}</Badge>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Users2 className="w-4 h-4 mr-1 text-primary" />
+                    <Badge variant="outline" className="group-hover:border-primary group-hover:text-primary transition-colors">{event.date}</Badge>
+                    <div className="flex items-center text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                      <Users2 className="w-4 h-4 mr-1 text-primary group-hover:animate-float" />
                       {event.participants}
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2">{event.title}</h3>
-                  <p className="text-muted-foreground mb-3 text-sm">{event.description}</p>
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{event.title}</h3>
+                  <p className="text-muted-foreground mb-3 text-sm group-hover:text-foreground transition-colors">{event.description}</p>
                   <div className="text-sm">
                     <span className="font-medium text-primary">Highlights:</span>
-                    <p className="text-muted-foreground mt-1">{event.highlights}</p>
+                    <p className="text-muted-foreground mt-1 group-hover:text-foreground transition-colors">{event.highlights}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -221,8 +222,8 @@ const EventsPage = () => {
             Don't miss out on our upcoming events. Follow us on social media and join our mailing list 
             for the latest updates.
           </p>
-          <Button size="lg" className="bg-gradient-primary">
-            Join Our Community
+          <Button size="lg" className="bg-gradient-primary hover:scale-110 transition-all duration-300 shadow-elegant hover:shadow-glow group">
+            <span className="group-hover:animate-float inline-block">Join Our Community</span>
           </Button>
         </div>
       </section>

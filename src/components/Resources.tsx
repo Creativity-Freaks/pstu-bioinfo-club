@@ -61,25 +61,25 @@ const Resources = () => {
           {resourceCategories.map((category, index) => (
             <Card
               key={index}
-              className="hover:shadow-xl transition-all duration-300 hover:-translate-y-2 animate-fade-in"
+              className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 animate-fade-in group border-t-4 border-t-primary/50 hover:border-t-primary"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardHeader>
-                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center mb-4`}>
-                  <category.icon className="w-8 h-8 text-white" />
+                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center mb-4 shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110`}>
+                  <category.icon className="w-8 h-8 text-white group-hover:animate-float" />
                 </div>
-                <CardTitle className="text-2xl">{category.title}</CardTitle>
+                <CardTitle className="text-2xl group-hover:text-primary transition-colors">{category.title}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {category.resources.map((resource, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted hover:bg-muted/70 transition-colors cursor-pointer group"
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted hover:bg-primary/10 hover:border-primary/30 border border-transparent transition-all duration-300 cursor-pointer group hover:scale-105"
                   >
-                    <span className="text-sm font-medium">{resource.name}</span>
+                    <span className="text-sm font-medium group-hover:text-primary transition-colors">{resource.name}</span>
                     <div className="flex items-center space-x-2">
-                      <span className="text-xs text-muted-foreground">{resource.type}</span>
-                      <ExternalLink className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">{resource.type}</span>
+                      <ExternalLink className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
                     </div>
                   </div>
                 ))}
@@ -94,18 +94,18 @@ const Resources = () => {
             {tools.map((tool, index) => (
               <div
                 key={index}
-                className="bg-card p-6 rounded-lg border border-border hover:border-primary transition-all hover:shadow-lg"
+                className="bg-card p-6 rounded-lg border border-border hover:border-primary transition-all duration-300 hover:shadow-elegant hover:-translate-y-2 group cursor-pointer"
               >
-                <h4 className="text-lg font-bold mb-2 text-primary">{tool.name}</h4>
-                <p className="text-sm text-muted-foreground">{tool.description}</p>
+                <h4 className="text-lg font-bold mb-2 text-primary group-hover:scale-105 transition-transform">{tool.name}</h4>
+                <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{tool.description}</p>
               </div>
             ))}
           </div>
         </div>
 
         <div className="mt-12 text-center">
-          <Button size="lg" className="bg-gradient-primary hover:opacity-90">
-            <Download className="w-5 h-5 mr-2" />
+          <Button size="lg" className="bg-gradient-primary hover:opacity-90 hover:scale-110 transition-all duration-300 shadow-elegant hover:shadow-glow group">
+            <Download className="w-5 h-5 mr-2 group-hover:animate-float" />
             Download All Resources
           </Button>
         </div>

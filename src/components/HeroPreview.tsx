@@ -21,9 +21,11 @@ const HeroPreview = () => {
 
       {/* Floating Icons */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <Dna className="absolute top-20 left-10 w-16 h-16 text-primary/20 animate-float" />
-        <Microscope className="absolute top-40 right-20 w-12 h-12 text-accent/20 animate-float" style={{ animationDelay: "1s" }} />
-        <Binary className="absolute bottom-32 left-20 w-14 h-14 text-primary/20 animate-float" style={{ animationDelay: "2s" }} />
+        <Dna className="absolute top-20 left-10 w-16 h-16 text-primary/20 animate-float opacity-70 hover:opacity-100 transition-opacity" />
+        <Microscope className="absolute top-40 right-20 w-12 h-12 text-accent/20 animate-float opacity-70 hover:opacity-100 transition-opacity" style={{ animationDelay: "1s" }} />
+        <Binary className="absolute bottom-32 left-20 w-14 h-14 text-primary/20 animate-float opacity-70 hover:opacity-100 transition-opacity" style={{ animationDelay: "2s" }} />
+        <Dna className="absolute bottom-40 right-40 w-10 h-10 text-secondary/20 animate-float opacity-50" style={{ animationDelay: "3s" }} />
+        <Microscope className="absolute top-1/2 left-1/4 w-8 h-8 text-primary/15 animate-float opacity-50" style={{ animationDelay: "2.5s" }} />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
@@ -39,12 +41,13 @@ const HeroPreview = () => {
           </p>
           <div className="flex flex-wrap gap-4 justify-center mb-12">
             <Link to="/about">
-              <Button size="lg" className="bg-gradient-primary text-lg px-8 animate-pulse">
+              <Button size="lg" className="bg-gradient-primary text-lg px-8 hover:scale-110 transition-all duration-300 shadow-elegant hover:shadow-glow group">
                 Explore More
+                <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
               </Button>
             </Link>
             <Link to="/events">
-              <Button size="lg" variant="outline" className="text-lg px-8 border-2">
+              <Button size="lg" variant="outline" className="text-lg px-8 border-2 hover:scale-110 hover:bg-primary/10 hover:border-primary transition-all duration-300">
                 View Events
               </Button>
             </Link>
@@ -55,12 +58,12 @@ const HeroPreview = () => {
             {stats.map((stat, index) => (
               <div
                 key={index}
-                className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-primary/20 hover:border-primary/40 transition-all hover:scale-105 animate-fade-in"
+                className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-primary/20 hover:border-primary/40 transition-all duration-500 hover:scale-110 hover:shadow-glow animate-fade-in group cursor-pointer"
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
-                <stat.icon className="w-10 h-10 mx-auto mb-3 text-primary" />
-                <div className="text-4xl font-bold text-primary mb-2">{stat.value}</div>
-                <div className="text-muted-foreground">{stat.label}</div>
+                <stat.icon className="w-10 h-10 mx-auto mb-3 text-primary group-hover:animate-float" />
+                <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-primary mb-2 group-hover:scale-110 transition-transform">{stat.value}</div>
+                <div className="text-muted-foreground group-hover:text-foreground transition-colors">{stat.label}</div>
               </div>
             ))}
           </div>

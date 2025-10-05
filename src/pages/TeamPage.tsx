@@ -113,13 +113,13 @@ const TeamPage = () => {
             {advisors.map((advisor, index) => (
               <Card
                 key={index}
-                className="bg-gradient-card border-0 shadow-xl hover:shadow-2xl transition-all duration-300 animate-fade-in"
+                className="bg-gradient-card border-0 shadow-elegant hover:shadow-glow transition-all duration-500 animate-fade-in group hover:-translate-y-2"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-8">
                   <div className="text-center mb-6">
-                    <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center">
-                      <span className="text-4xl font-bold text-primary-foreground">
+                    <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
+                      <span className="text-5xl font-bold text-primary-foreground group-hover:animate-float">
                         {advisor.name.split(' ')[1][0]}
                       </span>
                     </div>
@@ -163,19 +163,19 @@ const TeamPage = () => {
             {executiveCommittee.map((member, index) => (
               <Card
                 key={index}
-                className="hover:shadow-xl transition-all duration-300 hover:-translate-y-2 animate-fade-in"
+                className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 animate-fade-in group border-t-4 border-t-primary/50 hover:border-t-primary"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-6">
                   <div className="text-center mb-4">
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                      <span className="text-3xl font-bold text-white">
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
+                      <span className="text-3xl font-bold text-white group-hover:animate-float">
                         {member.name.split(' ')[0][0]}{member.name.split(' ')[1]?.[0] || ''}
                       </span>
                     </div>
-                    <h3 className="text-xl font-bold mb-1">{member.name}</h3>
-                    <p className="text-primary font-medium mb-1">{member.role}</p>
-                    <p className="text-sm text-muted-foreground">{member.department} • {member.year}</p>
+                    <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">{member.name}</h3>
+                    <p className="text-primary font-medium mb-1 group-hover:scale-105 transition-transform">{member.role}</p>
+                    <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{member.department} • {member.year}</p>
                   </div>
 
                   <div className="space-y-3 text-sm">
@@ -198,14 +198,14 @@ const TeamPage = () => {
                   </div>
 
                   <div className="flex justify-center space-x-3 mt-4 pt-4 border-t">
-                    <button className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
-                      <Facebook className="w-4 h-4 text-primary" />
+                    <button className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 hover:scale-125 transition-all duration-300 group">
+                      <Facebook className="w-4 h-4 text-primary group-hover:animate-float" />
                     </button>
-                    <button className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
-                      <Linkedin className="w-4 h-4 text-primary" />
+                    <button className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 hover:scale-125 transition-all duration-300 group">
+                      <Linkedin className="w-4 h-4 text-primary group-hover:animate-float" />
                     </button>
-                    <button className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
-                      <Mail className="w-4 h-4 text-primary" />
+                    <button className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 hover:scale-125 transition-all duration-300 group">
+                      <Mail className="w-4 h-4 text-primary group-hover:animate-float" />
                     </button>
                   </div>
                 </CardContent>
@@ -218,13 +218,13 @@ const TeamPage = () => {
       {/* Join Team CTA */}
       <section className="py-20 bg-gradient-card">
         <div className="container mx-auto px-4 text-center">
-          <Users className="w-16 h-16 mx-auto mb-6 text-primary" />
+          <Users className="w-16 h-16 mx-auto mb-6 text-primary animate-float" />
           <h2 className="text-4xl font-bold mb-4">Join Our Team</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
             We're always looking for passionate students to join our executive committee. 
             If you're dedicated, creative, and eager to make a difference, we'd love to hear from you!
           </p>
-          <Button size="lg" className="bg-gradient-primary">
+          <Button size="lg" className="bg-gradient-primary hover:scale-110 transition-all duration-300 shadow-elegant hover:shadow-glow">
             Apply Now
           </Button>
         </div>

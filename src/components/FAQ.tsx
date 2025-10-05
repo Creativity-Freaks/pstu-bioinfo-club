@@ -63,13 +63,13 @@ const FAQ = () => {
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="bg-background rounded-lg px-6 border shadow-sm animate-fade-in"
+                className="bg-gradient-card rounded-lg px-6 border border-border hover:border-primary/50 shadow-sm hover:shadow-elegant transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
-                <AccordionTrigger className="text-left hover:no-underline">
+                <AccordionTrigger className="text-left hover:no-underline hover:text-primary transition-colors">
                   <span className="font-semibold text-lg">{faq.question}</span>
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pt-2">
+                <AccordionContent className="text-muted-foreground pt-2 leading-relaxed">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
