@@ -4,6 +4,8 @@ import AboutPreview from "@/components/AboutPreview";
 import EventsPreview from "@/components/EventsPreview";
 import TeamPreview from "@/components/TeamPreview";
 import Resources from "@/components/Resources";
+import Partners from "@/components/Partners";
+import FAQ from "@/components/FAQ";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 
@@ -16,6 +18,8 @@ const Index = () => {
       <EventsPreview />
       <TeamPreview />
       <Resources />
+      <Partners />
+      <FAQ />
       <Contact />
       <Footer />
     </div>

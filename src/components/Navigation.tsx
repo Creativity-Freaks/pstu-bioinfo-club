@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import MembershipForm from "@/components/MembershipForm";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMembershipFormOpen, setIsMembershipFormOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -65,20 +67,12 @@ const Navigation = () => {
                 {item.label}
               </Link>
             ))}
-            {isHomePage ? (
-              <Button
-                onClick={() => scrollToSection("contact")}
-                className="bg-gradient-primary hover:opacity-90"
-              >
-                Join Us
-              </Button>
-            ) : (
-              <Link to="/#contact">
-                <Button className="bg-gradient-primary hover:opacity-90">
-                  Join Us
-                </Button>
-              </Link>
-            )}
+            <Button
+              onClick={() => setIsMembershipFormOpen(true)}
+              className="bg-gradient-primary hover:opacity-90"
+            >
+              Join Us
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -104,30 +98,24 @@ const Navigation = () => {
               </Link>
             ))}
             <div className="px-4 pt-2">
-              {isHomePage ? (
-                <Button
-                  onClick={() => {
-                    scrollToSection("contact");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full bg-gradient-primary hover:opacity-90"
-                >
-                  Join Us
-                </Button>
-              ) : (
-                <Link to="/#contact">
-                  <Button 
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-full bg-gradient-primary hover:opacity-90"
-                  >
-                    Join Us
-                  </Button>
-                </Link>
-              )}
+              <Button
+                onClick={() => {
+                  setIsMembershipFormOpen(true);
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full bg-gradient-primary hover:opacity-90"
+              >
+                Join Us
+              </Button>
             </div>
           </div>
         )}
       </div>
+
+      <MembershipForm 
+        open={isMembershipFormOpen} 
+        onOpenChange={setIsMembershipFormOpen} 
+      />
     </nav>
   );
 };
