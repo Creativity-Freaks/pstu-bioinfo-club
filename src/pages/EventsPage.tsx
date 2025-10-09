@@ -6,29 +6,70 @@ import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users2, Clock } from "lucide-react";
 
 const EventsPage = () => {
-  const upcomingEvents = [
+  const upcomingWorkshops = [
     {
-      title: "Introduction to Genomic Analysis",
-      date: "March 15, 2025",
-      time: "2:00 PM - 4:00 PM",
-      location: "Biology Lab, PSTU",
-      type: "Workshop",
-      attendees: 45,
-      description: "Learn the fundamentals of genomic data analysis using Python and Biopython. This hands-on workshop will cover sequence alignment, gene annotation, and basic phylogenetic analysis.",
-      instructor: "Dr. Rahman",
-      prerequisites: "Basic Python knowledge"
+      title: "Introduction to Python Programming",
+      date: "March 15, 2024",
+      time: "10:00 AM - 1:00 PM",
+      location: "Computer Lab 1, PSTU",
+      instructor: "Dr. Ahmed Khan",
+      seats: 30,
+      level: "Beginner",
+      description: "Learn the basics of Python for biological data analysis. Perfect for beginners with no prior programming experience.",
     },
     {
-      title: "Machine Learning in Drug Discovery",
-      date: "March 22, 2025",
-      time: "3:00 PM - 5:00 PM",
+      title: "NGS Data Analysis Workshop",
+      date: "March 22, 2024",
+      time: "2:00 PM - 6:00 PM",
+      location: "Bioinformatics Lab",
+      instructor: "Dr. Fatima Rahman",
+      seats: 25,
+      level: "Intermediate",
+      description: "Hands-on workshop on analyzing next-generation sequencing data using industry-standard tools and pipelines.",
+    },
+    {
+      title: "Machine Learning in Biology",
+      date: "March 29, 2024",
+      time: "9:00 AM - 2:00 PM",
       location: "Computer Lab 2",
-      type: "Seminar",
-      attendees: 60,
-      description: "Guest lecture on AI applications in pharmaceutical research. Explore how machine learning algorithms are revolutionizing drug discovery and molecular design.",
-      instructor: "Guest Speaker from Square Pharmaceuticals",
-      prerequisites: "None"
+      instructor: "Dr. Mohammad Hasan",
+      seats: 20,
+      level: "Advanced",
+      description: "Apply machine learning algorithms to biological datasets. Requires programming experience in Python.",
     },
+  ];
+
+  const upcomingSeminars = [
+    {
+      title: "Future of Personalized Medicine",
+      speaker: "Dr. Sarah Johnson",
+      organization: "Harvard Medical School",
+      date: "April 5, 2024",
+      time: "3:00 PM - 5:00 PM",
+      location: "Main Auditorium",
+      description: "Explore how genomics and AI are revolutionizing personalized healthcare and treatment strategies.",
+    },
+    {
+      title: "CRISPR Technology and Gene Editing",
+      speaker: "Prof. James Chen",
+      organization: "MIT",
+      date: "April 12, 2024",
+      time: "4:00 PM - 6:00 PM",
+      location: "Seminar Hall",
+      description: "Deep dive into CRISPR-Cas9 technology, its applications, and ethical considerations in modern genetics.",
+    },
+    {
+      title: "Computational Drug Discovery",
+      speaker: "Dr. Emily Williams",
+      organization: "Pfizer Research",
+      date: "April 19, 2024",
+      time: "2:00 PM - 4:00 PM",
+      location: "Conference Room A",
+      description: "Learn how computational methods are accelerating drug discovery and reducing development costs.",
+    },
+  ];
+
+  const upcomingEvents = [
     {
       title: "Bioinformatics Hackathon 2025",
       date: "April 5-6, 2025",
@@ -39,6 +80,17 @@ const EventsPage = () => {
       description: "24-hour hackathon to solve real biological problems using computational methods. Teams will work on challenges related to genome assembly, protein structure prediction, and disease biomarker identification.",
       instructor: "Faculty Panel",
       prerequisites: "Programming experience required"
+    },
+    {
+      title: "Career Fair: Biotech Industry",
+      date: "April 15, 2025",
+      time: "10:00 AM - 4:00 PM",
+      location: "Campus Ground",
+      type: "Career Event",
+      attendees: 200,
+      description: "Meet recruiters from leading biotech and pharmaceutical companies. Explore career opportunities in bioinformatics, genomics, and computational biology.",
+      instructor: "Industry Representatives",
+      prerequisites: "None"
     }
   ];
 
@@ -139,19 +191,147 @@ const EventsPage = () => {
         </div>
       </section>
 
-      {/* Upcoming Events */}
+      {/* Upcoming Workshops */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="mb-12">
             <h2 className="text-4xl font-bold mb-4">
-              Upcoming <span className="text-primary">Events</span>
+              Upcoming <span className="text-primary">Workshops</span>
             </h2>
             <p className="text-lg text-muted-foreground">
-              Register now to secure your spot in our upcoming events
+              Hands-on workshops to develop practical bioinformatics skills
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {upcomingWorkshops.map((workshop, index) => (
+              <Card
+                key={index}
+                className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 border-t-4 border-t-primary/50 hover:border-t-primary animate-fade-in group"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-3">
+                    <Badge className="bg-accent text-accent-foreground text-sm group-hover:scale-110 transition-transform">{workshop.level}</Badge>
+                    <div className="flex items-center text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                      <Users2 className="w-4 h-4 mr-1 group-hover:animate-float" />
+                      {workshop.seats} seats
+                    </div>
+                  </div>
+                  <CardTitle className="text-2xl mb-2 group-hover:text-primary transition-colors">{workshop.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">{workshop.description}</p>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-start text-sm">
+                      <Calendar className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-primary" />
+                      <div>
+                        <div className="font-medium">{workshop.date}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start text-sm">
+                      <Clock className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-primary" />
+                      <div>{workshop.time}</div>
+                    </div>
+                    <div className="flex items-start text-sm">
+                      <MapPin className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-primary" />
+                      <div>{workshop.location}</div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t space-y-2">
+                    <div className="text-sm">
+                      <span className="font-medium">Instructor:</span> {workshop.instructor}
+                    </div>
+                  </div>
+
+                  <Button className="w-full bg-gradient-primary hover:scale-105 transition-all duration-300 shadow-elegant hover:shadow-glow group">
+                    Register Now
+                    <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Upcoming Seminars */}
+      <section className="py-20 bg-muted">
+        <div className="container mx-auto px-4">
+          <div className="mb-12">
+            <h2 className="text-4xl font-bold mb-4">
+              Upcoming <span className="text-primary">Seminars</span>
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Expert talks from industry leaders and researchers
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {upcomingSeminars.map((seminar, index) => (
+              <Card
+                key={index}
+                className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 border-t-4 border-t-accent/50 hover:border-t-accent animate-fade-in group"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <CardHeader>
+                  <div className="mb-3">
+                    <Badge variant="secondary" className="group-hover:scale-110 transition-transform">Seminar</Badge>
+                  </div>
+                  <CardTitle className="text-2xl mb-2 group-hover:text-primary transition-colors">{seminar.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">{seminar.description}</p>
+                  
+                  <div className="space-y-2">
+                    <div className="text-sm">
+                      <span className="font-medium">Speaker:</span> {seminar.speaker}
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-medium">Organization:</span> {seminar.organization}
+                    </div>
+                    <div className="flex items-start text-sm">
+                      <Calendar className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-primary" />
+                      <div>
+                        <div className="font-medium">{seminar.date}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start text-sm">
+                      <Clock className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-primary" />
+                      <div>{seminar.time}</div>
+                    </div>
+                    <div className="flex items-start text-sm">
+                      <MapPin className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-primary" />
+                      <div>{seminar.location}</div>
+                    </div>
+                  </div>
+
+                  <Button className="w-full bg-gradient-primary hover:scale-105 transition-all duration-300 shadow-elegant hover:shadow-glow group">
+                    Attend Seminar
+                    <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Other Events */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="mb-12">
+            <h2 className="text-4xl font-bold mb-4">
+              Other <span className="text-primary">Events</span>
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Hackathons, career fairs, and special events
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
             {upcomingEvents.map((event, index) => (
               <Card
                 key={index}
@@ -190,7 +370,7 @@ const EventsPage = () => {
 
                   <div className="pt-3 border-t space-y-2">
                     <div className="text-sm">
-                      <span className="font-medium">Instructor:</span> {event.instructor}
+                      <span className="font-medium">Organizer:</span> {event.instructor}
                     </div>
                     <div className="text-sm">
                       <span className="font-medium">Prerequisites:</span> {event.prerequisites}
@@ -209,7 +389,7 @@ const EventsPage = () => {
       </section>
 
       {/* Past Events */}
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-gradient-card">
         <div className="container mx-auto px-4">
           <div className="mb-12">
             <h2 className="text-4xl font-bold mb-4">
