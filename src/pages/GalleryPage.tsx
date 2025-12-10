@@ -1,5 +1,6 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import FloatingActions from "@/components/FloatingActions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image, Video } from "lucide-react";
@@ -23,6 +24,7 @@ const GalleryPage = () => {
   return (
     <div className="min-h-screen">
       <Navigation />
+      <FloatingActions />
       
       <section className="py-20 bg-gradient-subtle">
         <div className="container mx-auto px-4">

@@ -1,5 +1,6 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import FloatingActions from "@/components/FloatingActions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Target, Award, BookOpen } from "lucide-react";
@@ -31,6 +32,7 @@ const MentorshipPage = () => {
   return (
     <div className="min-h-screen">
       <Navigation />
+      <FloatingActions />
       
       <section className="py-20 bg-gradient-subtle">
         <div className="container mx-auto px-4">

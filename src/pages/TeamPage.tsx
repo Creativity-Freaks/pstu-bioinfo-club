@@ -1,5 +1,6 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import FloatingActions from "@/components/FloatingActions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Facebook, Linkedin, Mail, Award, Users } from "lucide-react";
@@ -85,6 +86,7 @@ const TeamPage = () => {
   return (
     <div className="min-h-screen">
       <Navigation />
+      <FloatingActions />
       
       <section className="relative pt-32 pb-28 overflow-hidden">
         <div className="absolute inset-0">

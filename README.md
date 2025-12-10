@@ -22,10 +22,10 @@ Your gateway to bioinformatics at PSTU — workshops, blogs, mentorship, events,
 - Elegant component library: buttons, cards, dialogs, toasts, forms (`src/components/ui/*`).
 - Engaging sections: hero, previews, testimonials, resources, partners, FAQ, contact.
 - Rich content pages:
-	- `Index` (Homepage) — previews of About, Events, Courses, Team, and more.
-	- `BlogPage` — featured article, categories, grid of posts, newsletter signup.
-	- `EventsPage` — upcoming workshops/seminars, past events, vibrant stats.
-	- Plus: `CoursesPage`, `TeamPage`, `MentorshipPage`, `AboutPage`, `WorkshopsPage`, `GalleryPage`, `FoundingPage`.
+  - `Index` (Homepage) — previews of About, Events, Courses, Team, and more.
+  - `BlogPage` — featured article, categories, grid of posts, newsletter signup.
+  - `EventsPage` — upcoming workshops/seminars, past events, vibrant stats.
+  - Plus: `CoursesPage`, `TeamPage`, `MentorshipPage`, `AboutPage`, `WorkshopsPage`, `GalleryPage`, `FoundingPage`.
 
 ## Tech Stack
 
@@ -52,6 +52,7 @@ Alias: use `@` for `./src` (e.g., `import Navigation from "@/components/Navigati
 ## Quickstart
 
 ### Requirements
+
 - Node.js 18+
 - `npm` or `bun`
 

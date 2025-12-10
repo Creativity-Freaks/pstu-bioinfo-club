@@ -10,11 +10,13 @@ import Partners from "@/components/Partners";
 import FAQ from "@/components/FAQ";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import FloatingActions from "@/components/FloatingActions";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
       <Navigation />
+      <FloatingActions />
       <HeroPreview />
       <AboutPreview />
       <EventsPreview />

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, ArrowRight, BookOpen } from "lucide-react";
+import FloatingActions from "@/components/FloatingActions";
 
 const BlogPage = () => {
   const blogPosts = [
@@ -105,6 +106,7 @@ const BlogPage = () => {
   return (
     <div className="min-h-screen">
       <Navigation />
+      <FloatingActions />
       
       <section className="relative pt-32 pb-24 overflow-hidden bg-gradient-to-b from-muted/50 to-background">
         <div className="absolute inset-0 opacity-30">

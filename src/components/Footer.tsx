@@ -1,12 +1,24 @@
+import { useEffect, useState } from "react";
 import { Facebook, Mail, MapPin, Dna, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY || document.documentElement.scrollTop;
+      setShowScrollTop(y > 400);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
     <footer className="bg-gradient-card border-t border-border py-12 relative">
@@ -130,14 +142,7 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Scroll to Top Button */}
-      <Button
-        onClick={scrollToTop}
-        className="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-gradient-primary shadow-elegant hover:shadow-glow hover:scale-110 transition-all duration-300 z-40"
-        size="icon"
-      >
-        <ArrowUp className="w-5 h-5" />
-      </Button>
+      {/* Scroll to Top handled by FloatingActions; footer button removed to avoid duplication */}
     </footer>
   );
 };
