@@ -135,10 +135,23 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-border text-center">
-          <p className="text-sm text-muted-foreground">
-            © {currentYear} Bioinformatics Club PSTU. All rights reserved.
-          </p>
+        <div className="pt-8 border-t border-border">
+          <div className="mx-auto flex flex-wrap items-center justify-center gap-3 text-center text-sm text-muted-foreground">
+            <span>All rights reserved © {currentYear} Bioinformatics Club PSTU.</span>
+            <span className="hidden md:inline">•</span>
+            <span className="md:hidden">|</span>
+            <span className="inline-flex items-center gap-2">
+              <span className="uppercase tracking-wider text-primary/80">Designed & Developed by</span>
+              <a
+                href="https://cftechlab.hcsarker.me"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-gradient-primary text-primary-foreground font-semibold hover:opacity-90 transition-transform"
+              >
+                <span className="leading-none">CF TechLab</span>
+              </a>
+            </span>
+          </div>
         </div>
       </div>
 
