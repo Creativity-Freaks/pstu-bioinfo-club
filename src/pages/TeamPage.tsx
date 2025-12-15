@@ -3,7 +3,9 @@ import Footer from "@/components/Footer";
 import FloatingActions from "@/components/FloatingActions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Facebook, Linkedin, Mail, Award, Users } from "lucide-react";
+import { Facebook, Linkedin, Mail, Award, Users, Phone } from "lucide-react";
+import advisor1 from "@/assets/advisor/advisor1.jpeg";
+import advisor2 from "@/assets/advisor/advisor2.jpeg";
 import { Button } from "@/components/ui/button";
 
 const TeamPage = () => {
@@ -66,21 +68,31 @@ const TeamPage = () => {
 
   const advisors = [
     {
-      name: "Dr. Faculty Advisor",
-      title: "Associate Professor",
-      department: "Department of Biotechnology",
-      education: "PhD in Bioinformatics, University of Cambridge",
-      research: "Genomics, Computational Biology, Systems Biology",
-      publications: "40+ peer-reviewed publications"
+      name: "Dr. Md. Mahmudul Hassan",
+      title: "Chief Advisor",
+      department: "Department of Genetics and Plant Breeding, Faculty of Agriculture",
+      office:
+        "Patuakhali Science and Technology University, Dumki, Patuakhali-8602",
+      phone: "+8801707006769",
+      email: "mhassan@pstu.ac.bd",
+      photo: advisor2,
+      education: "PhD, The University Of Melbourne (2018), Australia; MSc, BAU (2010); BSc, PSTU (2008)",
+      research: "Genome Engineering, Synthetic Biology, Metabolic Engineering, Plant-Microbe Interaction",
+      publications: "40+ research articles in reputed journals",
     },
     {
-      name: "Dr. Technical Advisor",
-      title: "Assistant Professor",
-      department: "Department of Computer Science",
-      education: "PhD in Computer Science, MIT",
-      research: "Machine Learning, Artificial Intelligence in Biology",
-      publications: "25+ peer-reviewed publications"
-    }
+      name: "Dr. Md. Rajib Sharker",
+      title: "Professor",
+      department: "Department of Fisheries Biology and Genetics, Faculty of Fisheries",
+      office:
+        "Patuakhali Science and Technology University, Dumki, Patuakhali-8602",
+      phone: "01726227578",
+      email: "mrsharker@pstu.ac.bd",
+      photo: advisor1,
+      education: "PhD, Chonnam National University (2020), South Korea; MSc, BAU (2012); BSc, BAU (2010)",
+      research: "Molecular genetics, gene expression, Population genetics, Nutrigenomics",
+      publications: "37+ research articles in reputed journals",
+    },
   ];
 
   return (
@@ -167,30 +179,47 @@ const TeamPage = () => {
               >
                 <CardContent className="p-8">
                   <div className="text-center mb-6">
-                    <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
-                      <span className="text-5xl font-bold text-primary-foreground group-hover:animate-float">
-                        {advisor.name.split(' ')[1][0]}
-                      </span>
+                    <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden bg-card shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
+                      <img src={advisor.photo} alt={advisor.name} className="w-full h-full object-cover" />
                     </div>
                     <h3 className="text-2xl font-bold mb-2">{advisor.name}</h3>
                     <p className="text-primary font-medium text-lg mb-1">{advisor.title}</p>
                     <p className="text-muted-foreground">{advisor.department}</p>
+                    {advisor.office && (
+                      <p className="text-sm text-muted-foreground mt-2">{advisor.office}</p>
+                    )}
+                    <div className="flex items-center justify-center gap-4 mt-4 text-sm text-muted-foreground">
+                      {advisor.phone && (
+                        <span className="inline-flex items-center gap-1"><Phone className="w-4 h-4" /> {advisor.phone}</span>
+                      )}
+                      {advisor.email && (
+                        <span className="inline-flex items-center gap-1"><Mail className="w-4 h-4" /> {advisor.email}</span>
+                      )}
+                    </div>
                   </div>
                   
-                  <div className="space-y-3 text-sm">
-                    <div>
-                      <span className="font-semibold">Education:</span>
-                      <p className="text-muted-foreground">{advisor.education}</p>
+                  {advisor.education || advisor.research || advisor.publications ? (
+                    <div className="space-y-3 text-sm">
+                      {advisor.education && (
+                        <div>
+                          <span className="font-semibold">Education:</span>
+                          <p className="text-muted-foreground">{advisor.education}</p>
+                        </div>
+                      )}
+                      {advisor.research && (
+                        <div>
+                          <span className="font-semibold">Research Interests:</span>
+                          <p className="text-muted-foreground">{advisor.research}</p>
+                        </div>
+                      )}
+                      {advisor.publications && (
+                        <div>
+                          <span className="font-semibold">Publications:</span>
+                          <p className="text-muted-foreground">{advisor.publications}</p>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <span className="font-semibold">Research Interests:</span>
-                      <p className="text-muted-foreground">{advisor.research}</p>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Publications:</span>
-                      <p className="text-muted-foreground">{advisor.publications}</p>
-                    </div>
-                  </div>
+                  ) : null}
                 </CardContent>
               </Card>
             ))}

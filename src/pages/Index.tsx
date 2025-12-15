@@ -5,6 +5,7 @@ import EventsPreview from "@/components/EventsPreview";
 import CoursesPreview from "@/components/CoursesPreview";
 import TeamPreview from "@/components/TeamPreview";
 import Testimonials from "@/components/Testimonials";
+import Advisors from "@/components/Advisors";
 import Resources from "@/components/Resources";
 import Partners from "@/components/Partners";
 import FAQ from "@/components/FAQ";
@@ -21,6 +22,7 @@ const Index = () => {
       <AboutPreview />
       <EventsPreview />
       <CoursesPreview />
+      <Advisors />
       <TeamPreview />
       <Testimonials />
       <Resources />

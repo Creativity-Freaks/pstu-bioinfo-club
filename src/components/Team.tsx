@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Facebook, Linkedin, Mail } from "lucide-react";
+import { Facebook, Linkedin, Mail, Phone } from "lucide-react";
+import advisor1 from "@/assets/advisor/advisor1.jpeg";
 
 const Team = () => {
   const executiveCommittee = [
@@ -31,15 +32,25 @@ const Team = () => {
 
   const advisors = [
     {
-      name: "Dr. Faculty Advisor",
-      title: "Associate Professor",
-      department: "Department of Biotechnology"
+      name: "Dr. Md. Mahmudul Hassan",
+      title: "Chief Advisor",
+      department: "Department of Genetics and Plant Breeding, Faculty of Agriculture",
+      office:
+        "Patuakhali Science and Technology University, Dumki, Patuakhali-8602",
+      phone: "+8801707006769",
+      email: "mhassan@pstu.ac.bd",
+      photo: undefined,
     },
     {
-      name: "Dr. Technical Advisor",
-      title: "Assistant Professor",
-      department: "Department of Computer Science"
-    }
+      name: "Dr. Md. Rajib Sharker",
+      title: "Professor",
+      department: "Department of Fisheries Biology and Genetics, Faculty of Fisheries",
+      office:
+        "Patuakhali Science and Technology University, Dumki, Patuakhali-8602",
+      phone: "01726227578",
+      email: "mrsharker@pstu.ac.bd",
+      photo: advisor1,
+    },
   ];
 
   return (
@@ -65,14 +76,29 @@ const Team = () => {
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-8 text-center">
-                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center">
-                    <span className="text-3xl font-bold text-primary-foreground">
-                      {advisor.name.split(' ')[1][0]}
-                    </span>
+                  <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-card shadow-md">
+                    {advisor.photo ? (
+                      <img src={advisor.photo} alt={advisor.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-3xl font-bold text-foreground">
+                        {advisor.name.split(' ')[1]?.[0] || advisor.name[0]}
+                      </span>
+                    )}
                   </div>
                   <h4 className="text-2xl font-bold mb-2">{advisor.name}</h4>
                   <p className="text-primary font-medium mb-1">{advisor.title}</p>
                   <p className="text-muted-foreground">{advisor.department}</p>
+                  {advisor.office && (
+                    <p className="text-sm text-muted-foreground mt-2">{advisor.office}</p>
+                  )}
+                  <div className="flex items-center justify-center gap-4 mt-4 text-sm text-muted-foreground">
+                    {advisor.phone && (
+                      <span className="inline-flex items-center gap-1"><Phone className="w-4 h-4" /> {advisor.phone}</span>
+                    )}
+                    {advisor.email && (
+                      <span className="inline-flex items-center gap-1"><Mail className="w-4 h-4" /> {advisor.email}</span>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))}
