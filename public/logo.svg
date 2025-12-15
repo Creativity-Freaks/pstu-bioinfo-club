@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="32" y1="16" x2="224" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6EE7F9"/>
+      <stop offset="50%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#EC4899"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="32" y1="240" x2="224" y2="16" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#EC4899"/>
+      <stop offset="50%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#6EE7F9"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="#0B1020"/>
+  <g filter="url(#glow)">
+    <path d="M64 56c40 0 56 48 64 72s24 72 64 72" stroke="url(#g1)" stroke-width="10" stroke-linecap="round" fill="none"/>
+    <path d="M64 200c40 0 56-48 64-72s24-72 64-72" stroke="url(#g2)" stroke-width="10" stroke-linecap="round" fill="none"/>
+  </g>
+  <g fill="#A5B4FC">
+    <circle cx="88" cy="88" r="6"/>
+    <circle cx="120" cy="112" r="6"/>
+    <circle cx="152" cy="144" r="6"/>
+    <circle cx="184" cy="168" r="6"/>
+  </g>
+  <text x="128" y="228" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" fill="#E2E8F0">Bioinformatics Club</text>
+</svg>

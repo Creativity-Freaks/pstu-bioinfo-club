@@ -26,8 +26,8 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center space-x-3 mb-4 group">
-              <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
-                <Dna className="w-5 h-5 text-white animate-pulse" />
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-card flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
+                <img src="/public/BIOINFORMATICS CLUB.png" alt="Bioinformatics Club Logo" className="w-8 h-8 object-contain" />
               </div>
               <div>
                 <h3 className="font-bold group-hover:text-primary transition-colors">Bioinformatics Club</h3>
