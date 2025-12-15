@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Facebook, Mail, MapPin, Dna, ArrowUp } from "lucide-react";
+import siteLogo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 
 const Footer = () => {
@@ -27,7 +28,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center space-x-3 mb-4 group">
               <div className="w-10 h-10 rounded-full overflow-hidden bg-card flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
-                <img src="/public/BIOINFORMATICS CLUB.png" alt="Bioinformatics Club Logo" className="w-8 h-8 object-contain" />
+                <img src={siteLogo} alt="Bioinformatics Club Logo" className="w-8 h-8 object-contain" />
               </div>
               <div>
                 <h3 className="font-bold group-hover:text-primary transition-colors">Bioinformatics Club</h3>

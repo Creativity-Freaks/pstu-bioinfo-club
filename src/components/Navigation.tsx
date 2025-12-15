@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Dna } from "lucide-react";
+import siteLogo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import MembershipForm from "@/components/MembershipForm";
 
@@ -50,7 +51,7 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center space-x-3 group cursor-pointer">
             <div className="w-12 h-12 rounded-full overflow-hidden bg-card flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
-              <img src="/public/logo.png" alt="Bioinformatics Club Logo" className="w-10 h-10 object-contain" />
+              <img src={siteLogo} alt="Bioinformatics Club Logo" className="w-10 h-10 object-contain" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Bioinformatics Club</h1>
