@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Facebook, Mail, MapPin, Dna, ArrowUp } from "lucide-react";
+import { Facebook, Mail, MapPin, Phone, Linkedin, Dna, ArrowUp } from "lucide-react";
 import siteLogo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 
@@ -120,17 +120,30 @@ const Footer = () => {
                 <span>PSTU, Dumki, Patuakhali</span>
               </div>
               <div className="flex items-start space-x-3 text-sm text-muted-foreground hover:text-primary transition-colors group cursor-pointer">
+                <Phone className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:animate-float" />
+                <span>+8801604637564</span>
+              </div>
+              <div className="flex items-start space-x-3 text-sm text-muted-foreground hover:text-primary transition-colors group cursor-pointer">
                 <Mail className="w-4 h-4 mt-0.5 flex-shrink-0 group-hover:animate-float" />
-                <span>bioinfoclub@pstu.ac.bd</span>
+                <span>bioinformaticsclubpstu@gmail.com</span>
               </div>
               <a
-                href="https://www.facebook.com/profile.php?id=61577988400909"
+                href="https://www.facebook.com/share/1BzcjXm1iB/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-3 text-sm text-muted-foreground hover:text-primary transition-all duration-300 group"
               >
                 <Facebook className="w-4 h-4 group-hover:scale-125 transition-transform" />
                 <span>Follow us on Facebook</span>
+              </a>
+              <a
+                href="https://www.linkedin.com/company/bioinformatics-club-pstu/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 text-sm text-muted-foreground hover:text-primary transition-all duration-300 group"
+              >
+                <Linkedin className="w-4 h-4 group-hover:scale-125 transition-transform" />
+                <span>Connect on LinkedIn</span>
               </a>
             </div>
           </div>

@@ -49,7 +49,7 @@ const Navigation = () => {
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          <div className="flex items-center space-x-3 group cursor-pointer">
+          <Link to="/" className="flex items-center space-x-3 group cursor-pointer">
             <div className="w-12 h-12 rounded-full overflow-hidden bg-card flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
               <img src={siteLogo} alt="Bioinformatics Club Logo" className="w-10 h-10 object-contain" />
             </div>
@@ -57,7 +57,7 @@ const Navigation = () => {
               <h1 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Bioinformatics Club</h1>
               <p className="text-xs text-muted-foreground">PSTU</p>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -65,6 +65,13 @@ const Navigation = () => {
               <Link
                 key={item.label}
                 to={item.href}
+                onClick={(e) => {
+                  if (location.pathname === item.href) {
+                    e.preventDefault();
+                    // Force a hard refresh when clicking the current tab
+                    window.location.reload();
+                  }
+                }}
                 className="text-foreground hover:text-primary transition-all duration-300 font-medium relative group"
               >
                 {item.label}
@@ -95,7 +102,13 @@ const Navigation = () => {
               <Link
                 key={item.label}
                 to={item.href}
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => {
+                  if (location.pathname === item.href) {
+                    e.preventDefault();
+                    window.location.reload();
+                  }
+                  setIsMobileMenuOpen(false);
+                }}
                 className="block w-full text-left px-4 py-3 text-foreground hover:bg-muted hover:text-primary transition-all duration-300 rounded-lg mx-2"
               >
                 {item.label}

@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { MessageSquare, Mail, Phone, Github, Facebook, Linkedin, ArrowUp } from "lucide-react";
 
 const actions = [
-  { icon: MessageSquare, label: "Chat", href: "#contact" },
-  { icon: Mail, label: "Email", href: "mailto:info@bioinfo.pstu.edu" },
-  { icon: Phone, label: "Call", href: "tel:+8801000000000" },
+  { icon: MessageSquare, label: "Chat", href: "https://wa.me/8801604637564" },
+  { icon: Mail, label: "Email", href: "mailto:bioinformaticsclubpstu@gmail.com" },
+  { icon: Phone, label: "Call", href: "tel:+8801604637564" },
   { icon: Github, label: "GitHub", href: "https://github.com/Creativity-Freaks/pstu-bioinfo-club" },
-  { icon: Facebook, label: "Facebook", href: "https://facebook.com" },
-  { icon: Linkedin, label: "LinkedIn", href: "https://linkedin.com" },
+  { icon: Facebook, label: "Facebook", href: "https://www.facebook.com/share/1BzcjXm1iB/" },
+  { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/company/bioinformatics-club-pstu/" },
 ];
 
 const FloatingActions = () => {

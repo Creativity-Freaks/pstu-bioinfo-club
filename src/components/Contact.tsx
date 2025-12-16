@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Facebook, Mail, MapPin, Phone } from "lucide-react";
+import { Facebook, Linkedin, Mail, MapPin, Phone } from "lucide-react";
 
 const Contact = () => {
   const handleSubmit = (e: React.FormEvent) => {
@@ -86,7 +86,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <p className="font-medium">Email</p>
-                      <p className="text-white/90">bioinfoclub@pstu.ac.bd</p>
+                      <p className="text-white/90">bioinformaticsclubpstu@gmail.com</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
@@ -95,7 +95,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <p className="font-medium">Phone</p>
-                      <p className="text-white/90">+880 1XXX-XXXXXX</p>
+                      <p className="text-white/90">+8801604637564</p>
                     </div>
                   </div>
                 </div>
@@ -107,13 +107,22 @@ const Contact = () => {
                 <h3 className="text-2xl font-bold mb-6">Follow Us</h3>
                 <div className="space-y-4">
                   <a
-                    href="https://www.facebook.com/profile.php?id=61577988400909"
+                    href="https://www.facebook.com/share/1BzcjXm1iB/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center space-x-4 p-4 rounded-lg bg-muted hover:bg-primary/10 hover:border-primary/30 border border-transparent transition-all duration-300 hover:scale-105 group"
                   >
                     <Facebook className="w-6 h-6 text-primary group-hover:scale-125 transition-transform" />
-                    <span className="font-medium">Facebook Page</span>
+                    <span className="font-medium">Facebook</span>
+                  </a>
+                  <a
+                    href="https://www.linkedin.com/company/bioinformatics-club-pstu/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-4 p-4 rounded-lg bg-muted hover:bg-primary/10 hover:border-primary/30 border border-transparent transition-all duration-300 hover:scale-105 group"
+                  >
+                    <Linkedin className="w-6 h-6 text-primary group-hover:scale-125 transition-transform" />
+                    <span className="font-medium">LinkedIn</span>
                   </a>
                   <div className="bg-gradient-to-br from-accent/10 to-secondary/10 p-6 rounded-lg border border-accent/20">
                     <h4 className="font-bold mb-2">Office Hours</h4>

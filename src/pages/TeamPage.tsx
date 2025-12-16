@@ -7,6 +7,7 @@ import { Facebook, Linkedin, Mail, Award, Users, Phone } from "lucide-react";
 import advisor1 from "@/assets/advisor/advisor1.jpeg";
 import advisor2 from "@/assets/advisor/advisor2.jpeg";
 import { Button } from "@/components/ui/button";
+import Executive2025 from "@/components/Executive2025";
 
 const TeamPage = () => {
   const executiveCommittee = [
@@ -237,59 +238,7 @@ const TeamPage = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {executiveCommittee.map((member, index) => (
-              <Card
-                key={index}
-                className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 animate-fade-in group border-t-4 border-t-primary/50 hover:border-t-primary"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <CardContent className="p-6">
-                  <div className="text-center mb-4">
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
-                      <span className="text-3xl font-bold text-white group-hover:animate-float">
-                        {member.name.split(' ')[0][0]}{member.name.split(' ')[1]?.[0] || ''}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">{member.name}</h3>
-                    <p className="text-primary font-medium mb-1 group-hover:scale-105 transition-transform">{member.role}</p>
-                    <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{member.department} • {member.year}</p>
-                  </div>
-
-                  <div className="space-y-3 text-sm">
-                    <p className="text-muted-foreground">{member.bio}</p>
-                    
-                    <div className="bg-muted p-3 rounded-lg">
-                      <div className="flex items-start gap-2 mb-2">
-                        <Award className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                        <div>
-                          <span className="font-semibold block">Achievements:</span>
-                          <span className="text-muted-foreground">{member.achievements}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="font-semibold">Expertise:</span>
-                      <p className="text-muted-foreground">{member.expertise}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-center space-x-3 mt-4 pt-4 border-t">
-                    <button className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 hover:scale-125 transition-all duration-300 group">
-                      <Facebook className="w-4 h-4 text-primary group-hover:animate-float" />
-                    </button>
-                    <button className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 hover:scale-125 transition-all duration-300 group">
-                      <Linkedin className="w-4 h-4 text-primary group-hover:animate-float" />
-                    </button>
-                    <button className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 hover:scale-125 transition-all duration-300 group">
-                      <Mail className="w-4 h-4 text-primary group-hover:animate-float" />
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Executive2025 />
         </div>
       </section>
 

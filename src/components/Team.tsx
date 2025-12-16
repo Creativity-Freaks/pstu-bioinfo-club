@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Facebook, Linkedin, Mail, Phone } from "lucide-react";
 import advisor1 from "@/assets/advisor/advisor1.jpeg";
+import Executive2025 from "@/components/Executive2025";
 
 const Team = () => {
   const executiveCommittee = [
@@ -108,38 +109,7 @@ const Team = () => {
         {/* Executive Committee */}
         <div>
           <h3 className="text-3xl font-bold text-center mb-8">Executive Committee</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {executiveCommittee.map((member, index) => (
-              <Card
-                key={index}
-                className="hover:shadow-xl transition-all duration-300 hover:-translate-y-2 animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <CardContent className="p-6 text-center">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                    <span className="text-2xl font-bold text-white">
-                      {member.name.split(' ')[0][0]}{member.name.split(' ')[1]?.[0] || ''}
-                    </span>
-                  </div>
-                  <h4 className="text-xl font-bold mb-1">{member.name}</h4>
-                  <p className="text-primary font-medium mb-2">{member.role}</p>
-                  <p className="text-sm text-muted-foreground mb-3">{member.department}</p>
-                  <p className="text-sm text-muted-foreground mb-4">{member.bio}</p>
-                  <div className="flex justify-center space-x-3">
-                    <button className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
-                      <Facebook className="w-4 h-4 text-primary" />
-                    </button>
-                    <button className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
-                      <Linkedin className="w-4 h-4 text-primary" />
-                    </button>
-                    <button className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
-                      <Mail className="w-4 h-4 text-primary" />
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Executive2025 />
         </div>
 
         <div className="mt-12 text-center">

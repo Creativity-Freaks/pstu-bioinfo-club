@@ -3,6 +3,10 @@ import Footer from "@/components/Footer";
 import FloatingActions from "@/components/FloatingActions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, Users, Target, Calendar } from "lucide-react";
+import saimonImg from "@/assets/founding member/saimon.jpeg";
+import parthoImg from "@/assets/founding member/partho.jpeg";
+import niloyImg from "@/assets/founding member/niloy.jpeg";
+import hasibImg from "@/assets/founding member/hasib.jpeg";
 
 const FoundingPage = () => {
   const milestones = [
@@ -13,9 +17,13 @@ const FoundingPage = () => {
   ];
 
   const founders = [
-    { name: "Dr. Rahman Ahmed", role: "Faculty Advisor", department: "Dept. of Biotechnology" },
-    { name: "Fatima Sultana", role: "Founding President", department: "BSc in Biotechnology, 3rd Year" },
-    { name: "Karim Hassan", role: "Founding Vice President", department: "BSc in Computer Science, 4th Year" },
+    { name: "Saimon Islam", role: "Founder", faculty: "Faculty of Agriculture", session: "2019-20", photo: saimonImg },
+    { name: "Partho Sarker Dhrubo", role: "Co-founder", faculty: "Faculty of Agriculture", session: "2019-2020", photo: parthoImg },
+  ];
+
+  const foundingMembers = [
+    { name: "A.S.M. Nur-A-Safi Niloy", role: "Founding Member", department: "Nutrition and Food Science", session: "2022-23", photo: niloyImg },
+    { name: "Md.Hasibur Rahman", role: "Founding Member", department: "Nutrition and Food Science", session: "2022-23", photo: hasibImg },
   ];
 
   return (
@@ -92,16 +100,34 @@ const FoundingPage = () => {
 
           <div>
             <h2 className="text-3xl font-bold mb-8 text-center">Founding Team</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {founders.map((founder, index) => (
+            <div className="grid md:grid-cols-2 gap-6 mb-12">
+              {founders.map((f, index) => (
                 <Card key={index} className="text-center hover:shadow-glow transition-all duration-300">
                   <CardContent className="p-6">
-                    <div className="w-24 h-24 rounded-full bg-gradient-primary mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold">
-                      {founder.name.split(' ').map(n => n[0]).join('')}
+                    <div className="w-24 h-24 rounded-full overflow-hidden bg-card mx-auto mb-4 shadow-md">
+                      <img src={f.photo} alt={f.name} className="w-full h-full object-cover" />
                     </div>
-                    <h3 className="text-xl font-bold mb-1">{founder.name}</h3>
-                    <p className="text-primary font-medium mb-2">{founder.role}</p>
-                    <p className="text-sm text-muted-foreground">{founder.department}</p>
+                    <h3 className="text-xl font-bold mb-1">{f.name}</h3>
+                    <p className="text-primary font-medium mb-1">{f.role}</p>
+                    <p className="text-sm text-muted-foreground">{f.faculty}</p>
+                    <p className="text-xs text-muted-foreground">Session: {f.session}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <h3 className="text-2xl font-bold mb-6 text-center">Founding Members</h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              {foundingMembers.map((m, index) => (
+                <Card key={index} className="text-center hover:shadow-glow transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="w-24 h-24 rounded-full overflow-hidden bg-card mx-auto mb-4 shadow-md">
+                      <img src={m.photo} alt={m.name} className="w-full h-full object-cover" />
+                    </div>
+                    <h4 className="text-lg font-bold mb-1">{m.name}</h4>
+                    <p className="text-primary font-medium mb-1">{m.role}</p>
+                    <p className="text-sm text-muted-foreground">{m.department}</p>
+                    <p className="text-xs text-muted-foreground">Session: {m.session}</p>
                   </CardContent>
                 </Card>
               ))}

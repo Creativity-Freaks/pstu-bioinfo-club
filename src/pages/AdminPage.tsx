@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 const getSupabase = (): SupabaseClient | null => {
@@ -19,7 +19,7 @@ const getSupabase = (): SupabaseClient | null => {
 
 type Entity = "courses" | "events" | "team_members" | "gallery_items" | "blog_posts";
 
-type Row = { id?: number; [key: string]: any };
+type Row = { id?: number } & Record<string, unknown>;
 
 const AdminPage = () => {
   const [active, setActive] = useState<Entity>("courses");
@@ -36,7 +36,7 @@ const AdminPage = () => {
     blog_posts: ["title", "slug", "excerpt", "content"],
   };
 
-  const loadRows = async () => {
+  const loadRows = useCallback(async () => {
     const client = getSupabase();
     if (!client) {
       setErrorMsg("Supabase environment variables are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
@@ -50,13 +50,13 @@ const AdminPage = () => {
       setErrorMsg(error.message);
       return;
     }
-    setRows(data || []);
-  };
+    setRows((data as Row[]) || []);
+  }, [active]);
 
   useEffect(() => {
     loadRows();
     setForm({});
-  }, [active]);
+  }, [loadRows]);
 
   const upsertRow = async () => {
     const client = getSupabase();
@@ -106,11 +106,21 @@ const AdminPage = () => {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <Card className="mb-6">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Admin Panel</CardTitle>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>Refresh</Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <Tabs value={active} onValueChange={(v) => setActive(v as Entity)}>
+              <Tabs
+                value={active}
+                onValueChange={(v) => {
+                  setActive(v as Entity);
+                  // Scroll to top instantly when tab changes
+                  window.scrollTo(0, 0);
+                }}
+              >
                 <TabsList className="flex flex-wrap">
                   <TabsTrigger value="courses">Courses</TabsTrigger>
                   <TabsTrigger value="events">Events</TabsTrigger>
@@ -130,7 +140,7 @@ const AdminPage = () => {
                             <div key={c} className="space-y-1">
                               <label className="text-sm text-muted-foreground capitalize">{c.replace("_", " ")}</label>
                               <Input
-                                value={form[c] ?? ""}
+                                value={String(form[c] ?? "")}
                                 onChange={(e) => setForm({ ...form, [c]: e.target.value })}
                               />
                             </div>
