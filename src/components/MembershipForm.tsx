@@ -67,7 +67,8 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
         throw new Error(data.error || `Failed to send membership email (${res.status})`);
       }
     } catch (err) {
-      // Silently ignore email failures; primary action (DB insert) succeeded
+      const msg = err instanceof Error ? err.message : String(err);
+      toast({ title: "Email not sent", description: msg, variant: "destructive" });
     }
     toast({
       title: "Application Submitted!",
