@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import { Dna, Microscope, Binary } from "lucide-react";
 import heroImage from "@/assets/hero-bg.jpg";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
     if (element) {
@@ -48,8 +51,8 @@ const Hero = () => {
               className="bg-accent hover:bg-accent/90 text-accent-foreground px-8 py-6 text-lg"
             >
               Learn More
-            </Button>
             <Button
+              onClick={() => navigate("/join")}
               onClick={() => scrollToSection("#contact")}
               size="lg"
               variant="outline"

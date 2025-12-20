@@ -78,12 +78,12 @@ const Navigation = () => {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-primary group-hover:w-full transition-all duration-300"></span>
               </Link>
             ))}
-            <Button
-              onClick={() => setIsMembershipFormOpen(true)}
-              className="bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-glow"
+            <Link
+              to="/join"
+              className="bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-glow text-white px-4 py-2 rounded-md"
             >
               Join Us
-            </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -115,24 +115,20 @@ const Navigation = () => {
               </Link>
             ))}
             <div className="px-4 pt-2">
-              <Button
-                onClick={() => {
-                  setIsMembershipFormOpen(true);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300"
+              <Link
+                to="/join"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block w-full text-center bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300 text-white py-3 rounded-md"
               >
                 Join Us
-              </Button>
+              </Link>
             </div>
           </div>
         )}
       </div>
 
-      <MembershipForm 
-        open={isMembershipFormOpen} 
-        onOpenChange={setIsMembershipFormOpen} 
-      />
+      {/* Membership dialog retained but not used for navbar button anymore */}
+      <MembershipForm open={isMembershipFormOpen} onOpenChange={setIsMembershipFormOpen} />
     </nav>
   );
 };

@@ -97,20 +97,61 @@ npm run preview
 - `preview` — preview build locally
 - `lint` — run ESLint across the repo
 
-## Environment & Config
+## Environment Setup
 
 - Supabase config lives under `supabase/config.toml` and `src/integrations/supabase/*`.
-- If you add environment variables (e.g., for Supabase URL and anon key), create a `.env` and wire via `vite.config.ts` or `import.meta.env`.
+- Copy `.env.example` to `.env` and fill in values.
 
-Example (not committed):
+### Required Variables
 
 ```zsh
 # .env
 VITE_SUPABASE_URL="https://YOUR_PROJECT.supabase.co"
 VITE_SUPABASE_ANON_KEY="YOUR_ANON_KEY"
+
+# Admin access control (choose one)
+# Exact allowed admin email
+VITE_ADMIN_EMAIL="club-admin@yourdomain.com"
+# OR allow any email under this domain
+VITE_ADMIN_EMAIL_DOMAIN="yourdomain.com"
 ```
 
-Access via: `const url = import.meta.env.VITE_SUPABASE_URL`
+- Access in code via `import.meta.env.*` (e.g., `import.meta.env.VITE_SUPABASE_URL`).
+- The Admin page is locked behind email/password auth and will only unlock for the configured admin email or domain.
+
+### Supabase: Getting Keys & Admin User
+
+- In Supabase Dashboard → Settings → API, copy the Project URL and `anon` key.
+- In Supabase Dashboard → Authentication → Users:
+  - Create a user with `VITE_ADMIN_EMAIL` and set a password.
+  - This account will be able to sign in on `/admin`.
+
+### Local Development
+
+```zsh
+cp .env.example .env
+# edit .env with your values
+
+npm run dev
+```
+
+### Vercel Environment Variables
+
+Set the same variables in Vercel (Production, Preview, Development):
+
+```zsh
+# Supabase
+vercel env add VITE_SUPABASE_URL production
+vercel env add VITE_SUPABASE_ANON_KEY production
+vercel env add VITE_ADMIN_EMAIL production   # or VITE_ADMIN_EMAIL_DOMAIN
+
+# Repeat for preview & development if needed
+vercel env add VITE_SUPABASE_URL preview
+vercel env add VITE_SUPABASE_ANON_KEY preview
+vercel env add VITE_ADMIN_EMAIL preview
+```
+
+Redeploy after updating envs.
 
 ## Deployment
 

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { UserPlus, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MembershipFormProps {
   open: boolean;
@@ -26,18 +27,30 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
     skills: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Handle form submission (you can integrate with backend later)
-    console.log("Membership application:", formData);
-    
+    setSubmitting(true);
+    const { error } = await supabase.from("memberships").insert({
+      name: formData.name,
+      email: formData.email,
+      student_id: formData.studentId,
+      department: formData.department,
+      year: formData.year,
+      phone: formData.phone,
+      bio: formData.bio,
+      skills: formData.skills,
+    });
+    setSubmitting(false);
+    if (error) {
+      toast({ title: "Submission failed", description: error.message, variant: "destructive" as any });
+      return;
+    }
     toast({
       title: "Application Submitted!",
       description: "We'll review your application and get back to you soon.",
     });
-    
-    // Reset form and close dialog
     setFormData({
       name: "",
       email: "",
@@ -182,8 +195,8 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button type="submit" className="flex-1 bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-elegant hover:shadow-glow">
-              Submit Application
+            <Button type="submit" className="flex-1 bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-elegant hover:shadow-glow" disabled={submitting}>
+              {submitting ? "Submitting..." : "Submit Application"}
             </Button>
             <Button
               type="button"

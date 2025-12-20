@@ -251,7 +251,7 @@ const TeamPage = () => {
             We're always looking for passionate students to join our executive committee. 
             If you're dedicated, creative, and eager to make a difference, we'd love to hear from you!
           </p>
-          <Button size="lg" className="bg-gradient-primary hover:scale-110 transition-all duration-300 shadow-elegant hover:shadow-glow">
+          <Button size="lg" className="bg-gradient-primary hover:scale-110 transition-all duration-300 shadow-elegant hover:shadow-glow" onClick={() => (window.location.href = "/join") }>
             Apply Now
           </Button>
         </div>

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, ArrowRight, BookOpen } from "lucide-react";
 import FloatingActions from "@/components/FloatingActions";
+import { useSupabaseList } from "@/hooks/useSupabaseList";
 
 const BlogPage = () => {
   const blogPosts = [
@@ -103,6 +104,15 @@ const BlogPage = () => {
     "Research"
   ];
 
+  const { data: dbPosts, isLoading: postsLoading, error: postsError } = useSupabaseList<{
+    id: number;
+    title: string;
+    slug?: string;
+    excerpt?: string;
+    content?: string;
+    created_at?: string;
+  }>("blog_posts", { orderBy: "id", ascending: false, limit: 9 });
+
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -169,6 +179,34 @@ const BlogPage = () => {
               </Button>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* From Database */}
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold mb-2">Latest from Admin</h2>
+            <p className="text-muted-foreground">Posts managed via Admin Panel</p>
+          </div>
+          {postsError && <p className="text-red-500 mb-6">{String(postsError.message || postsError)}</p>}
+          {postsLoading ? (
+            <p className="text-muted-foreground">Loading posts...</p>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {(dbPosts ?? []).map((p, idx) => (
+                <Card key={p.id} className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-2 border-t-4 border-t-primary/50">
+                  <CardHeader>
+                    <CardTitle className="text-xl">{p.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground line-clamp-4">{p.excerpt || ""}</p>
+                    <Button variant="outline" className="w-full mt-4">Read</Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

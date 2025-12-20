@@ -4,6 +4,7 @@ import FloatingActions from "@/components/FloatingActions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image, Video } from "lucide-react";
+import { useSupabaseList } from "@/hooks/useSupabaseList";
 
 const GalleryPage = () => {
   const photos = [
@@ -20,6 +21,13 @@ const GalleryPage = () => {
     { id: 2, thumbnail: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800", title: "Workshop Highlights", duration: "8:45" },
     { id: 3, thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800", title: "Research Talk", duration: "12:20" },
   ];
+
+  const { data: gallery, isLoading: galleryLoading, error: galleryError } = useSupabaseList<{
+    id: number;
+    title?: string;
+    image_url?: string;
+    caption?: string;
+  }>("gallery_items", { orderBy: "id", ascending: false, limit: 18 });
 
   return (
     <div className="min-h-screen">
@@ -50,6 +58,30 @@ const GalleryPage = () => {
             </TabsList>
 
             <TabsContent value="photos" className="mt-8">
+              {galleryError && <p className="text-red-500 mb-6">{String(galleryError.message || galleryError)}</p>}
+              {galleryLoading && <p className="text-muted-foreground mb-6">Loading photos...</p>}
+              {(gallery && gallery.length > 0) && (
+                <div className="grid md:grid-cols-3 gap-6 mb-10">
+                  {gallery.map((g) => (
+                    <Card key={g.id} className="group overflow-hidden hover:shadow-glow transition-all duration-300">
+                      <CardContent className="p-0">
+                        <div className="relative overflow-hidden">
+                          <img
+                            src={g.image_url || ""}
+                            alt={g.caption || g.title || "Gallery"}
+                            className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
+                          />
+                          {(g.caption || g.title) && (
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                              <p className="text-white p-4 font-medium">{g.caption || g.title}</p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
               <div className="grid md:grid-cols-3 gap-6">
                 {photos.map((photo) => (
                   <Card key={photo.id} className="group overflow-hidden hover:shadow-glow transition-all duration-300">

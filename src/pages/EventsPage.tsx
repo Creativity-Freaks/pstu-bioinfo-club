@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users2, Clock } from "lucide-react";
 import FloatingActions from "@/components/FloatingActions";
+import { useSupabaseList } from "@/hooks/useSupabaseList";
 
 const EventsPage = () => {
   const upcomingWorkshops = [
@@ -140,6 +141,14 @@ const EventsPage = () => {
     }
   ];
 
+  const { data: dbEvents, isLoading: eventsLoading, error: eventsError } = useSupabaseList<{
+    id: number;
+    title: string;
+    description?: string;
+    date?: string;
+    location?: string;
+  }>("events", { orderBy: "id", ascending: false, limit: 9 });
+
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -190,6 +199,42 @@ const EventsPage = () => {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* All Events (Dynamic) */}
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold mb-2">Latest Events</h2>
+            <p className="text-muted-foreground">From the Admin dashboard</p>
+          </div>
+          {eventsError && <p className="text-red-500 mb-6">{String(eventsError.message || eventsError)}</p>}
+          {eventsLoading ? (
+            <p className="text-muted-foreground">Loading events...</p>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {(dbEvents ?? []).map((ev, index) => (
+                <Card key={ev.id} className="hover:shadow-elegant transition-all duration-500 border-t-4 border-t-primary/50 hover:-translate-y-2">
+                  <CardHeader>
+                    <CardTitle className="text-2xl">{ev.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-muted-foreground">{ev.description || ""}</p>
+                    <div className="space-y-2 text-sm">
+                      {ev.date && (
+                        <div className="flex items-center gap-2"><Calendar className="w-4 h-4" /> {ev.date}</div>
+                      )}
+                      {ev.location && (
+                        <div className="flex items-center gap-2"><MapPin className="w-4 h-4" /> {ev.location}</div>
+                      )}
+                    </div>
+                    <Button variant="outline" className="w-full">Details</Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -438,7 +483,7 @@ const EventsPage = () => {
             Don't miss out on our upcoming events. Follow us on social media and join our mailing list 
             for the latest updates.
           </p>
-          <Button size="lg" className="bg-gradient-primary hover:scale-110 transition-all duration-300 shadow-elegant hover:shadow-glow group">
+          <Button size="lg" className="bg-gradient-primary hover:scale-110 transition-all duration-300 shadow-elegant hover:shadow-glow group" onClick={() => (window.location.href = "/join") }>
             <span className="group-hover:animate-float inline-block">Join Our Community</span>
           </Button>
         </div>
