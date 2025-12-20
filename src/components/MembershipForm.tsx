@@ -57,11 +57,15 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
         subject: "New membership application",
         message: `Student ID: ${formData.studentId}\nDepartment: ${formData.department}\nYear: ${formData.year}\nPhone: ${formData.phone}\n\nBio:\n${formData.bio}\n\nSkills:\n${formData.skills || "N/A"}`,
       };
-      await fetch("/api/send-email", {
+      const res = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Failed to send membership email (${res.status})`);
+      }
     } catch (err) {
       // Silently ignore email failures; primary action (DB insert) succeeded
     }
