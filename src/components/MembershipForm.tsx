@@ -44,7 +44,7 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
     });
     setSubmitting(false);
     if (error) {
-      toast({ title: "Submission failed", description: error.message, variant: "destructive" as any });
+      toast({ title: "Submission failed", description: error.message, variant: "destructive" });
       return;
     }
 

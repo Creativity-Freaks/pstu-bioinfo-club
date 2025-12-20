@@ -135,6 +135,55 @@ cp .env.example .env
 npm run dev
 ```
 
+### Email Notifications
+
+Contact and membership submissions can automatically notify the admin via email. You have two options:
+
+- Gmail SMTP (recommended if you use Gmail)
+- Resend (simple email API)
+
+Configure one of them.
+
+#### Option A: Gmail SMTP (App Password)
+
+1. Enable 2FA on the Gmail account to be used.
+2. Create an App Password in Google Account → Security → App passwords.
+3. Set these envs:
+
+```zsh
+vercel env add GMAIL_USER production           # yourgmail@gmail.com
+vercel env add GMAIL_APP_PASSWORD production   # 16-char app password
+vercel env add MAIL_FROM production            # optional, defaults to GMAIL_USER
+vercel env add ADMIN_EMAIL production          # recipient admin address
+```
+
+Repeat for `preview` if needed:
+
+```zsh
+vercel env add GMAIL_USER preview
+vercel env add GMAIL_APP_PASSWORD preview
+vercel env add MAIL_FROM preview
+vercel env add ADMIN_EMAIL preview
+```
+
+The API route [api/send-email.ts](api/send-email.ts) will use Gmail first if configured.
+
+#### Option B: Resend
+
+1. Create a Resend account and get the API key.
+2. Verify a sender address (optional for custom `MAIL_FROM`).
+3. Set envs:
+
+```zsh
+vercel env add RESEND_API_KEY production
+vercel env add ADMIN_EMAIL production
+vercel env add MAIL_FROM production            # optional, e.g., a verified sender
+```
+
+Repeat for `preview` if needed.
+
+If Gmail envs are not set, the API will fallback to Resend.
+
 ### Vercel Environment Variables
 
 Set the same variables in Vercel (Production, Preview, Development):
@@ -149,6 +198,9 @@ vercel env add VITE_ADMIN_EMAIL production   # or VITE_ADMIN_EMAIL_DOMAIN
 vercel env add VITE_SUPABASE_URL preview
 vercel env add VITE_SUPABASE_ANON_KEY preview
 vercel env add VITE_ADMIN_EMAIL preview
+
+# If using domain-based gating
+vercel env add VITE_ADMIN_EMAIL_DOMAIN preview
 ```
 
 Redeploy after updating envs.

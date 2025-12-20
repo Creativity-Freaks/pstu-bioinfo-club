@@ -20,7 +20,7 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
-      toast({ title: "Missing fields", description: "Please fill name, email and message.", variant: "destructive" as any });
+      toast({ title: "Missing fields", description: "Please fill name, email and message.", variant: "destructive" });
       return;
     }
     setSubmitting(true);
@@ -52,8 +52,9 @@ const Contact = () => {
       }
       toast({ title: "Message sent", description: "Thanks! We'll get back to you soon." });
       setForm({ name: "", email: "", studentId: "", message: "" });
-    } catch (err: any) {
-      toast({ title: "Could not send", description: err?.message || String(err), variant: "destructive" as any });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast({ title: "Could not send", description: msg, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }

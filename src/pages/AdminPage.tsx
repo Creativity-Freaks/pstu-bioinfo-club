@@ -8,9 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, CalendarDays, Users, Images, FileText, IdCard, LayoutDashboard } from "lucide-react";
+import { BookOpen, CalendarDays, Users, Images, FileText, IdCard, LayoutDashboard, Mail } from "lucide-react";
 
-type Entity = "dashboard" | "courses" | "events" | "team_members" | "gallery_items" | "blog_posts" | "memberships";
+type Entity = "dashboard" | "courses" | "events" | "team_members" | "gallery_items" | "blog_posts" | "memberships" | "contact_messages";
 
 type Row = { id?: number } & Record<string, unknown>;
 
@@ -35,6 +35,7 @@ const AdminPage = () => {
     gallery_items: null,
     blog_posts: null,
     memberships: null,
+    contact_messages: null,
   });
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -48,6 +49,7 @@ const AdminPage = () => {
     gallery_items: ["title", "image_url", "caption"],
     blog_posts: ["title", "slug", "excerpt", "content"],
     memberships: ["name", "email", "student_id", "department", "year", "phone", "bio", "skills"],
+    contact_messages: ["name", "email", "student_id", "message"],
   };
 
   const loadRows = useCallback(async () => {
@@ -75,7 +77,7 @@ const AdminPage = () => {
   const loadCounts = useCallback(async () => {
     if (!isAuthorized) return;
     if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) return;
-    const entities: Entity[] = ["courses", "events", "team_members", "gallery_items", "blog_posts", "memberships"];
+    const entities: Entity[] = ["courses", "events", "team_members", "gallery_items", "blog_posts", "memberships", "contact_messages"];
     const results = await Promise.all(
       entities.map(async (e) => {
         const { count } = await supabase.from(e).select("*", { count: "exact", head: true });
@@ -255,6 +257,7 @@ const AdminPage = () => {
                             { key: "gallery_items", label: "Gallery", icon: Images },
                             { key: "blog_posts", label: "Blog", icon: FileText },
                             { key: "memberships", label: "Memberships", icon: IdCard },
+                            { key: "contact_messages", label: "Contact Messages", icon: Mail },
                           ].map((item) => {
                             const Icon = item.icon as any;
                             const activeItem = active === item.key;
@@ -265,7 +268,7 @@ const AdminPage = () => {
                                 onClick={() => setActive(item.key as Entity)}
                               >
                                 <span className="flex items-center gap-2">
-                                  <Icon className="w-4 h-4" />
+                                    <Icon className="w-4 h-4" />
                                   <span>{item.label}</span>
                                 </span>
                                 {item.key !== "dashboard" && (
@@ -297,6 +300,7 @@ const AdminPage = () => {
                                 { label: "Gallery Items", key: "gallery_items" as Entity },
                                 { label: "Blog Posts", key: "blog_posts" as Entity },
                                 { label: "Memberships", key: "memberships" as Entity },
+                                { label: "Contact Messages", key: "contact_messages" as Entity },
                               ].map((card) => (
                                 <Card key={card.key}>
                                   <CardHeader>
@@ -312,7 +316,7 @@ const AdminPage = () => {
                               ))}
                             </div>
                           </TabsContent>
-                          {(["courses", "events", "team_members", "gallery_items", "blog_posts"] as Entity[]).map((e) => (
+                          {(["courses", "events", "team_members", "gallery_items", "blog_posts", "contact_messages"] as Entity[]).map((e) => (
                             <TabsContent key={e} value={e}>
                               <div className="grid md:grid-cols-3 gap-6 mt-0">
                                 <Card className="md:col-span-1">
@@ -520,8 +524,9 @@ const AdminPage = () => {
                       <TabsTrigger value="gallery_items">Gallery</TabsTrigger>
                       <TabsTrigger value="blog_posts">Blog</TabsTrigger>
                       <TabsTrigger value="memberships">Memberships</TabsTrigger>
+                      <TabsTrigger value="contact_messages">Contact Messages</TabsTrigger>
                     </TabsList>
-                    {(["courses", "events", "team_members", "gallery_items", "blog_posts"] as Entity[]).map((e) => (
+                    {(["courses", "events", "team_members", "gallery_items", "blog_posts", "contact_messages"] as Entity[]).map((e) => (
                       <TabsContent key={e} value={e}>
                         <div className="grid md:grid-cols-3 gap-6 mt-6">
                           <Card className="md:col-span-1">
