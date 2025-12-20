@@ -224,14 +224,16 @@ const AdminPage = () => {
       setErrorMsg("Admin access is restricted.");
       return;
     }
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      setErrorMsg("Supabase environment variables are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
-      return;
-    }
     setErrorMsg(null);
     setLoading(true);
     const payload = { ...form };
-    const { error } = await supabase.from(active).upsert(payload).select();
+    // Route admin writes through server to bypass RLS
+    const res = await fetch("/api/admin-upsert", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ table: active, payload }),
+    });
+    const { error } = res.ok ? { error: null } : { error: new Error(await res.text()) };
     setLoading(false);
     if (error) {
       setErrorMsg(error.message);
@@ -249,13 +251,14 @@ const AdminPage = () => {
       setErrorMsg("Admin access is restricted.");
       return;
     }
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      setErrorMsg("Supabase environment variables are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
-      return;
-    }
     setErrorMsg(null);
     setLoading(true);
-    const { error } = await supabase.from(active).delete().eq("id", id);
+    const res = await fetch("/api/admin-delete", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ table: active, id }),
+    });
+    const { error } = res.ok ? { error: null } : { error: new Error(await res.text()) };
     setLoading(false);
     if (error) {
       setErrorMsg(error.message);
