@@ -5,16 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image, Video } from "lucide-react";
 import { useSupabaseList } from "@/hooks/useSupabaseList";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
 
 const GalleryPage = () => {
-  const photos = [
-    { id: 1, url: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800", caption: "Workshop 2024" },
-    { id: 2, url: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800", caption: "Seminar on Bioinformatics" },
-    { id: 3, url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800", caption: "Team Meeting" },
-    { id: 4, url: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800", caption: "Lab Session" },
-    { id: 5, url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800", caption: "Research Presentation" },
-    { id: 6, url: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=800", caption: "Conference 2023" },
-  ];
+  const [limit, setLimit] = useState(18);
 
   const videos = [
     { id: 1, thumbnail: "https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800", title: "Introduction to Club", duration: "5:30" },
@@ -27,7 +22,7 @@ const GalleryPage = () => {
     title?: string;
     image_url?: string;
     caption?: string;
-  }>("gallery_items", { orderBy: "id", ascending: false, limit: 18 });
+  }>("gallery_items", { orderBy: "id", ascending: false, limit });
 
   return (
     <div className="min-h-screen">
@@ -59,7 +54,17 @@ const GalleryPage = () => {
 
             <TabsContent value="photos" className="mt-8">
               {galleryError && <p className="text-red-500 mb-6">{String(galleryError.message || galleryError)}</p>}
-              {galleryLoading && <p className="text-muted-foreground mb-6">Loading photos...</p>}
+              {galleryLoading && (
+                <div className="grid md:grid-cols-3 gap-6 mb-10">
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <Card key={i}>
+                      <CardContent className="p-0">
+                        <Skeleton className="w-full h-64" />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
               {(gallery && gallery.length > 0) && (
                 <div className="grid md:grid-cols-3 gap-6 mb-10">
                   {gallery.map((g) => (
@@ -69,6 +74,7 @@ const GalleryPage = () => {
                           <img
                             src={g.image_url || ""}
                             alt={g.caption || g.title || "Gallery"}
+                            loading="lazy"
                             className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
                           />
                           {(g.caption || g.title) && (
@@ -82,24 +88,19 @@ const GalleryPage = () => {
                   ))}
                 </div>
               )}
-              <div className="grid md:grid-cols-3 gap-6">
-                {photos.map((photo) => (
-                  <Card key={photo.id} className="group overflow-hidden hover:shadow-glow transition-all duration-300">
-                    <CardContent className="p-0">
-                      <div className="relative overflow-hidden">
-                        <img
-                          src={photo.url}
-                          alt={photo.caption}
-                          className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                          <p className="text-white p-4 font-medium">{photo.caption}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              {(!galleryLoading && (!gallery || gallery.length === 0)) && (
+                <div className="text-center text-muted-foreground mb-10">No photos yet. Check back soon!</div>
+              )}
+              {(!galleryLoading && gallery && gallery.length >= limit) && (
+                <div className="flex justify-center mt-4">
+                  <button
+                    className="px-4 py-2 text-sm rounded-md border bg-background hover:bg-muted"
+                    onClick={() => setLimit((l) => l + 12)}
+                  >
+                    Load More
+                  </button>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="videos" className="mt-8">

@@ -41,6 +41,7 @@ const AdminPage = () => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const columnsByEntity: Record<Entity, string[]> = {
     dashboard: [],
@@ -74,6 +75,41 @@ const AdminPage = () => {
     }
     setRows((data as Row[]) || []);
   }, [active, isAuthorized]);
+
+  const handleGalleryImageUpload = async (file: File) => {
+    if (!file) return;
+    if (!isAuthorized) {
+      setErrorMsg("Admin access is restricted. Please sign in.");
+      return;
+    }
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      setErrorMsg("Supabase environment variables are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+      return;
+    }
+    try {
+      setErrorMsg(null);
+      setUploadingImage(true);
+      const bucket = "gallery";
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const filePath = `gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: upErr } = await supabase.storage.from(bucket).upload(filePath, file, {
+        upsert: true,
+        cacheControl: "3600",
+      });
+      if (upErr) {
+        throw upErr;
+      }
+      const { data: pub } = await supabase.storage.from(bucket).getPublicUrl(filePath);
+      const url = pub?.publicUrl || "";
+      if (!url) throw new Error("Could not retrieve public URL for uploaded image.");
+      setForm({ ...form, image_url: url });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setErrorMsg(msg);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const loadCounts = useCallback(async () => {
     if (!isAuthorized) return;
@@ -328,10 +364,38 @@ const AdminPage = () => {
                                     {columns.map((c) => (
                                       <div key={c} className="space-y-1">
                                         <label className="text-sm text-muted-foreground capitalize">{c.replace("_", " ")}</label>
-                                        <Input
-                                          value={String(form[c] ?? "")}
-                                          onChange={(e) => setForm({ ...form, [c]: e.target.value })}
-                                        />
+                                        {active === "gallery_items" && c === "image_url" ? (
+                                          <div className="space-y-2">
+                                            <Input
+                                              placeholder="https://..."
+                                              value={String(form[c] ?? "")}
+                                              onChange={(e) => setForm({ ...form, [c]: e.target.value })}
+                                            />
+                                            <div className="flex items-center gap-2">
+                                              <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => {
+                                                  const f = e.target.files?.[0];
+                                                  if (f) handleGalleryImageUpload(f);
+                                                }}
+                                              />
+                                              <Button type="button" disabled={uploadingImage} onClick={() => {}}>
+                                                {uploadingImage ? "Uploading..." : "Upload to Supabase"}
+                                              </Button>
+                                            </div>
+                                            {form.image_url && (
+                                              <div className="mt-2">
+                                                <img src={String(form.image_url)} alt="Preview" className="h-24 rounded object-cover border" />
+                                              </div>
+                                            )}
+                                          </div>
+                                        ) : (
+                                          <Input
+                                            value={String(form[c] ?? "")}
+                                            onChange={(e) => setForm({ ...form, [c]: e.target.value })}
+                                          />
+                                        )}
                                       </div>
                                     ))}
                                     <div className="flex gap-2">
