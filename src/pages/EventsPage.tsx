@@ -182,19 +182,19 @@ const EventsPage = () => {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
               <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-primary/10 hover:border-primary/30 transition-all hover:scale-105">
-                <div className="text-3xl font-bold text-primary mb-1">50+</div>
+                <div className="text-3xl font-bold text-primary mb-1">10+</div>
                 <div className="text-sm text-muted-foreground">Events Held</div>
               </div>
               <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-primary/10 hover:border-primary/30 transition-all hover:scale-105">
-                <div className="text-3xl font-bold text-primary mb-1">1000+</div>
+                <div className="text-3xl font-bold text-primary mb-1">500+</div>
                 <div className="text-sm text-muted-foreground">Participants</div>
               </div>
               <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-primary/10 hover:border-primary/30 transition-all hover:scale-105">
-                <div className="text-3xl font-bold text-primary mb-1">30+</div>
+                <div className="text-3xl font-bold text-primary mb-1">2+</div>
                 <div className="text-sm text-muted-foreground">Workshops</div>
               </div>
               <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-primary/10 hover:border-primary/30 transition-all hover:scale-105">
-                <div className="text-3xl font-bold text-primary mb-1">15+</div>
+                <div className="text-3xl font-bold text-primary mb-1">5+</div>
                 <div className="text-sm text-muted-foreground">Speakers</div>
               </div>
             </div>

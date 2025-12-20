@@ -12,12 +12,12 @@ const TeamPreview = () => {
     },
     {
       name: "Executive Committee",
-      count: "6",
+      count: "50+",
       description: "Dedicated student leaders"
     },
     {
       name: "Active Members",
-      count: "150+",
+      count: "100+",
       description: "Passionate bioinformatics enthusiasts"
     }
   ];

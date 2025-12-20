@@ -100,11 +100,16 @@ const JoinPage = () => {
                           <SelectValue placeholder="Select department" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="biotechnology">Biotechnology</SelectItem>
+                          <SelectItem value="agriculture">Agriculture</SelectItem>
                           <SelectItem value="cs">Computer Science</SelectItem>
-                          <SelectItem value="biochemistry">Biochemistry</SelectItem>
-                          <SelectItem value="microbiology">Microbiology</SelectItem>
+                          <SelectItem value="nfs">NFS</SelectItem>
+                          <SelectItem value="ansvm">ANHVM</SelectItem>
                           <SelectItem value="genetics">Genetics</SelectItem>
+                          <SelectItem value="eee">EEE</SelectItem>
+                          <SelectItem value="esdm">ESDM</SelectItem>
+                          <SelectItem value="lla">LLA</SelectItem>
+                          <SelectItem value="bba">BBA</SelectItem>
+                          <SelectItem value="fisheries">FISHERIES</SelectItem>
                           <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>

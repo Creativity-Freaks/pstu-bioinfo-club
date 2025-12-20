@@ -47,6 +47,24 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
       toast({ title: "Submission failed", description: error.message, variant: "destructive" as any });
       return;
     }
+
+    // Notify admin via email
+    try {
+      const payload = {
+        type: "membership",
+        name: formData.name,
+        email: formData.email,
+        subject: "New membership application",
+        message: `Student ID: ${formData.studentId}\nDepartment: ${formData.department}\nYear: ${formData.year}\nPhone: ${formData.phone}\n\nBio:\n${formData.bio}\n\nSkills:\n${formData.skills || "N/A"}`,
+      };
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      // Silently ignore email failures; primary action (DB insert) succeeded
+    }
     toast({
       title: "Application Submitted!",
       description: "We'll review your application and get back to you soon.",

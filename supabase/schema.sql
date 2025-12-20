@@ -46,6 +46,16 @@ create table if not exists public.blog_posts (
    created_at timestamp with time zone default now()
 );
 
+-- Contact messages
+create table if not exists public.contact_messages (
+   id         bigserial primary key,
+   name       text not null,
+   email      text not null,
+   student_id text,
+   message    text not null,
+   created_at timestamp with time zone default now()
+);
+
 -- Membership applications
 create table if not exists public.memberships (
    id         bigserial primary key,
@@ -67,6 +77,7 @@ create table if not exists public.memberships (
 -- ALTER TABLE public.gallery_items  DISABLE ROW LEVEL SECURITY;
 -- ALTER TABLE public.blog_posts     DISABLE ROW LEVEL SECURITY;
 -- ALTER TABLE public.memberships    DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.contact_messages DISABLE ROW LEVEL SECURITY;
 
 -- Public read access policies (commented out)
 -- create policy if not exists "Public read courses" on public.courses for select using (true);
@@ -76,6 +87,9 @@ create table if not exists public.memberships (
 -- create policy if not exists "Public read blog" on public.blog_posts for select using (true);
 -- No public read for memberships (sensitive). Only allow inserts from anon and updates for authenticated.
 -- create policy if not exists "Anon can apply membership" on public.memberships for insert with check (true);
+
+-- Allow anonymous inserts for contact messages; reading is restricted (commented, enable as needed)
+-- create policy if not exists "Anon can create contact messages" on public.contact_messages for insert with check (true);
 
 -- Tighten access: limit memberships read/update to the club admin email only (commented out)
 -- drop policy if exists "Authenticated read memberships" on public.memberships;

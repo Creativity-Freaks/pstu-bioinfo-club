@@ -1,21 +1,22 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import FloatingActions from "@/components/FloatingActions";
-import siteLogo from "@/assets/logo.png";
+// AdminNavbar is rendered at the app root in admin/main.tsx
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, CalendarDays, Users, Images, FileText, IdCard } from "lucide-react";
+import { BookOpen, CalendarDays, Users, Images, FileText, IdCard, LayoutDashboard } from "lucide-react";
 
-type Entity = "courses" | "events" | "team_members" | "gallery_items" | "blog_posts" | "memberships";
+type Entity = "dashboard" | "courses" | "events" | "team_members" | "gallery_items" | "blog_posts" | "memberships";
 
 type Row = { id?: number } & Record<string, unknown>;
 
 const AdminPage = () => {
-  const [active, setActive] = useState<Entity>("courses");
+  const isAdminPath = typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
+  const [active, setActive] = useState<Entity>(isAdminPath ? "dashboard" : "courses");
   const [rows, setRows] = useState<Row[]>([]);
   const [form, setForm] = useState<Row>({});
   const [loading, setLoading] = useState(false);
@@ -26,8 +27,21 @@ const AdminPage = () => {
   const [authPassword, setAuthPassword] = useState("");
   const [authMsg, setAuthMsg] = useState<string | null>(null);
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
+  const [counts, setCounts] = useState<Record<Entity, number | null>>({
+    dashboard: null,
+    courses: null,
+    events: null,
+    team_members: null,
+    gallery_items: null,
+    blog_posts: null,
+    memberships: null,
+  });
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const columnsByEntity: Record<Entity, string[]> = {
+    dashboard: [],
     courses: ["title", "description", "duration", "level", "modules"],
     events: ["title", "description", "date", "location"],
     team_members: ["name", "role", "bio", "avatar_url"],
@@ -58,10 +72,32 @@ const AdminPage = () => {
     setRows((data as Row[]) || []);
   }, [active, isAuthorized]);
 
+  const loadCounts = useCallback(async () => {
+    if (!isAuthorized) return;
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) return;
+    const entities: Entity[] = ["courses", "events", "team_members", "gallery_items", "blog_posts", "memberships"];
+    const results = await Promise.all(
+      entities.map(async (e) => {
+        const { count } = await supabase.from(e).select("*", { count: "exact", head: true });
+        return { e, count: typeof count === "number" ? count : null };
+      })
+    );
+    const next: Record<Entity, number | null> = { ...counts };
+    results.forEach(({ e, count }) => {
+      next[e] = count;
+    });
+    setCounts(next);
+  }, [isAuthorized]);
+
   useEffect(() => {
     loadRows();
     setForm({});
+    setPage(1);
   }, [loadRows]);
+
+  useEffect(() => {
+    loadCounts();
+  }, [loadCounts, active]);
 
   // Auth session & authorization
   useEffect(() => {
@@ -142,6 +178,7 @@ const AdminPage = () => {
     }
     setForm({});
     loadRows();
+    loadCounts();
   };
 
   const editRow = (row: Row) => setForm(row);
@@ -164,54 +201,291 @@ const AdminPage = () => {
       return;
     }
     loadRows();
+    loadCounts();
   };
 
   const columns = columnsByEntity[active];
 
   const isAdminApp = typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
 
+  // Listen for reload requests from the top-level AdminNavbar
+  useEffect(() => {
+    const handler = () => {
+      loadRows();
+      // Also keep counts in sync
+      loadCounts();
+    };
+    window.addEventListener("admin:reload-data", handler as EventListener);
+    return () => window.removeEventListener("admin:reload-data", handler as EventListener);
+  }, [loadRows, loadCounts]);
+
   return (
-    <div className="min-h-screen">
+      <div className="min-h-screen">
       {!isAdminApp && <Navigation />}
       {!isAdminApp && <FloatingActions />}
 
-      {isAdminApp && (
-        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-border">
-          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-card flex items-center justify-center shadow">
-                <img src={siteLogo} alt="Bioinformatics Club" className="w-7 h-7 object-contain" />
-              </div>
-              <div>
-                
-                <h1 className="text-lg font-semibold">Admin Dashboard</h1>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {sessionEmail && <span className="text-sm text-muted-foreground hidden md:inline">Signed in as {sessionEmail}</span>}
-              {!isAuthed ? (
-                <>
-                  <Input placeholder="admin@club.com" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="w-56" />
-                  <Input type="password" placeholder="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} className="w-40" />
-                  <Button variant="outline" size="sm" onClick={handleSignIn}>Sign In</Button>
-                </>
-              ) : (
-                <Button variant="outline" size="sm" onClick={handleSignOut}>Sign Out</Button>
-              )}
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>Refresh</Button>
-              <Button variant="secondary" size="sm" onClick={() => loadRows()}>Reload Data</Button>
-            </div>
-          </div>
-          {authMsg && <div className="container mx-auto px-4 pb-2 text-sm text-muted-foreground">{authMsg}</div>}
-        </header>
-      )}
+     
 
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <Card className="mb-6">
-            <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <CardTitle>{isAdminApp ? "Content Management" : "Admin Panel"}</CardTitle>
-              {!isAdminApp && (
+      <section className={isAdminApp ? "py-8" : "py-16"}>
+        <div className={isAdminApp ? "px-4" : "container mx-auto px-4"}>
+          {isAdminApp ? (
+            <>
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold">Bioinformatics Club PSTU</h2>
+              </div>
+              {!isAuthorized ? (
+                <div className="p-4 text-sm text-muted-foreground">
+                  <p>Admin access is locked. Please sign in with the club admin email and password.</p>
+                </div>
+              ) : (
+                <Tabs value={active} onValueChange={(v) => setActive(v as Entity)}>
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                    {/* Sidebar */}
+                    <aside className="md:col-span-3 lg:col-span-2 sticky top-20">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Sections</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-1">
+                          {[
+                            { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+                            { key: "courses", label: "Courses", icon: BookOpen },
+                            { key: "events", label: "Events", icon: CalendarDays },
+                            { key: "team_members", label: "Team", icon: Users },
+                            { key: "gallery_items", label: "Gallery", icon: Images },
+                            { key: "blog_posts", label: "Blog", icon: FileText },
+                            { key: "memberships", label: "Memberships", icon: IdCard },
+                          ].map((item) => {
+                            const Icon = item.icon as any;
+                            const activeItem = active === item.key;
+                            return (
+                              <button
+                                key={item.key}
+                                className={`w-full text-left px-3 py-2 rounded-md flex items-center justify-between gap-2 transition-colors ${activeItem ? "bg-muted text-foreground" : "hover:bg-muted text-muted-foreground"}`}
+                                onClick={() => setActive(item.key as Entity)}
+                              >
+                                <span className="flex items-center gap-2">
+                                  <Icon className="w-4 h-4" />
+                                  <span>{item.label}</span>
+                                </span>
+                                {item.key !== "dashboard" && (
+                                  <span className="text-xs px-2 py-0.5 rounded bg-muted text-foreground">
+                                    {counts[item.key as Entity] ?? "–"}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </CardContent>
+                      </Card>
+                    </aside>
+
+                    {/* Main */}
+                    <div className="md:col-span-9 lg:col-span-10 w-full">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Content Management</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {/* Dashboard Overview */}
+                          <TabsContent value="dashboard">
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                              {[
+                                { label: "Courses", key: "courses" as Entity },
+                                { label: "Events", key: "events" as Entity },
+                                { label: "Team Members", key: "team_members" as Entity },
+                                { label: "Gallery Items", key: "gallery_items" as Entity },
+                                { label: "Blog Posts", key: "blog_posts" as Entity },
+                                { label: "Memberships", key: "memberships" as Entity },
+                              ].map((card) => (
+                                <Card key={card.key}>
+                                  <CardHeader>
+                                    <CardTitle className="text-base">{card.label}</CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-3xl font-semibold">{counts[card.key] ?? "–"}</p>
+                                    <div className="mt-3">
+                                      <Button size="sm" variant="outline" onClick={() => setActive(card.key)}>Manage</Button>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              ))}
+                            </div>
+                          </TabsContent>
+                          {(["courses", "events", "team_members", "gallery_items", "blog_posts"] as Entity[]).map((e) => (
+                            <TabsContent key={e} value={e}>
+                              <div className="grid md:grid-cols-3 gap-6 mt-0">
+                                <Card className="md:col-span-1">
+                                  <CardHeader>
+                                    <CardTitle>{form.id ? "Edit" : "Create"} {active.replace("_", " ")}</CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="space-y-3">
+                                    {columns.map((c) => (
+                                      <div key={c} className="space-y-1">
+                                        <label className="text-sm text-muted-foreground capitalize">{c.replace("_", " ")}</label>
+                                        <Input
+                                          value={String(form[c] ?? "")}
+                                          onChange={(e) => setForm({ ...form, [c]: e.target.value })}
+                                        />
+                                      </div>
+                                    ))}
+                                    <div className="flex gap-2">
+                                      <Button onClick={upsertRow} disabled={loading} className="bg-gradient-primary">
+                                        {form.id ? "Update" : "Create"}
+                                      </Button>
+                                      {form.id && (
+                                        <Button variant="secondary" onClick={() => setForm({})} disabled={loading}>Cancel</Button>
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                <Card className="md:col-span-2">
+                                  <CardHeader>
+                                    <div className="flex items-center justify-between">
+                                      <CardTitle>Manage {active.replace("_", " ")}</CardTitle>
+                                      <div className="flex items-center gap-2">
+                                        <Input
+                                          placeholder="Search..."
+                                          value={search}
+                                          onChange={(e) => {
+                                            setSearch(e.target.value);
+                                            setPage(1);
+                                          }}
+                                          className="w-40"
+                                        />
+                                        <Button size="sm" variant="secondary" onClick={() => setForm({})}>New</Button>
+                                        <Button size="sm" onClick={() => {
+                                          const cols = columns;
+                                          const rowsToExport = rows;
+                                          const header = cols.join(",");
+                                          const body = rowsToExport.map((r) => cols.map((c) => String(r[c] ?? "").replace(/"/g, '"')).join(",")).join("\n");
+                                          const csv = header + "\n" + body;
+                                          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                                          const url = URL.createObjectURL(blob);
+                                          const a = document.createElement("a");
+                                          a.href = url;
+                                          a.download = `${active}.csv`;
+                                          a.click();
+                                          URL.revokeObjectURL(url);
+                                        }}>Export CSV</Button>
+                                      </div>
+                                    </div>
+                                  </CardHeader>
+                                  <CardContent>
+                                    {errorMsg ? (
+                                      <p className="text-red-500">{errorMsg}</p>
+                                    ) : loading ? (
+                                      <p className="text-muted-foreground">Loading...</p>
+                                    ) : rows.length === 0 ? (
+                                      <p className="text-muted-foreground">No records yet.</p>
+                                    ) : (
+                                      <div className="overflow-x-auto">
+                                        {(() => {
+                                          const q = search.trim().toLowerCase();
+                                          const filtered = q
+                                            ? rows.filter((r) => columns.some((c) => String(r[c] ?? "").toLowerCase().includes(q)))
+                                            : rows;
+                                          const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+                                          const clampedPage = Math.min(page, totalPages);
+                                          if (clampedPage !== page) setPage(clampedPage);
+                                          const start = (clampedPage - 1) * pageSize;
+                                          const visible = filtered.slice(start, start + pageSize);
+                                          return (
+                                            <>
+                                              <table className="w-full text-sm">
+                                                <thead className="sticky top-0 bg-background">
+                                                  <tr>
+                                                    {columns.map((c) => (
+                                                      <th key={c} className="text-left p-2 capitalize">{c.replace("_", " ")}</th>
+                                                    ))}
+                                                    <th className="text-left p-2">Actions</th>
+                                                  </tr>
+                                                </thead>
+                                                <tbody>
+                                                  {visible.map((r) => (
+                                                    <tr key={r.id} className="border-t border-border">
+                                                      {columns.map((c) => (
+                                                        <td key={c} className="p-2 break-words">{String(r[c] ?? "")}</td>
+                                                      ))}
+                                                      <td className="p-2 flex gap-2">
+                                                        <Button size="sm" variant="secondary" onClick={() => editRow(r)}>Edit</Button>
+                                                        <Button size="sm" variant="destructive" onClick={() => deleteRow(r.id)}>Delete</Button>
+                                                      </td>
+                                                    </tr>
+                                                  ))}
+                                                </tbody>
+                                              </table>
+                                              <div className="flex items-center justify-end gap-2 mt-3">
+                                                <span className="text-xs text-muted-foreground">Page {clampedPage} / {totalPages}</span>
+                                                <Button size="sm" variant="outline" onClick={() => setPage(Math.max(1, clampedPage - 1))} disabled={clampedPage <= 1}>Prev</Button>
+                                                <Button size="sm" variant="outline" onClick={() => setPage(Math.min(totalPages, clampedPage + 1))} disabled={clampedPage >= totalPages}>Next</Button>
+                                              </div>
+                                            </>
+                                          );
+                                        })()}
+                                      </div>
+                                    )}
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            </TabsContent>
+                          ))}
+                          <TabsContent value="memberships">
+                            <div className="grid md:grid-cols-1 gap-6 mt-0">
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle>Membership Applications</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  {errorMsg ? (
+                                    <p className="text-red-500">{errorMsg}</p>
+                                  ) : loading ? (
+                                    <p className="text-muted-foreground">Loading...</p>
+                                  ) : rows.length === 0 ? (
+                                    <p className="text-muted-foreground">No applications yet.</p>
+                                  ) : (
+                                    <div className="overflow-x-auto">
+                                      <table className="w-full text-sm">
+                                        <thead className="sticky top-0 bg-background">
+                                          <tr>
+                                            {columns.map((c) => (
+                                              <th key={c} className="text-left p-2 capitalize">{c.replace("_", " ")}</th>
+                                            ))}
+                                            <th className="text-left p-2">Actions</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {rows.map((r) => (
+                                            <tr key={r.id} className="border-t border-border">
+                                              {columns.map((c) => (
+                                                <td key={c} className="p-2 break-words">{String(r[c] ?? "")}</td>
+                                              ))}
+                                              <td className="p-2 flex gap-2">
+                                                <Button size="sm" variant="secondary" onClick={() => editRow(r)}>View</Button>
+                                                <Button size="sm" variant="destructive" onClick={() => deleteRow(r.id)}>Delete</Button>
+                                              </td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            </div>
+                          </TabsContent>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                </Tabs>
+              )}
+            </>
+          ) : (
+            <Card className="mb-6">
+              <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <CardTitle>Admin Panel</CardTitle>
                 <div className="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-auto">
                   {!isAuthed ? (
                     <div className="flex items-center gap-2">
@@ -225,222 +499,132 @@ const AdminPage = () => {
                     </div>
                   )}
                   <Button variant="outline" size="sm" onClick={() => window.location.reload()}>Refresh</Button>
-                  <Button variant="secondary" size="sm" onClick={() => loadRows()}>Reload Data</Button>
+                  <Button variant="secondary" size="sm" onClick={() => { loadRows(); loadCounts(); }}>Reload Data</Button>
                 </div>
-              )}
-              {!isAdminApp && authMsg && <p className="text-sm text-muted-foreground">{authMsg}</p>}
-            </CardHeader>
-            <CardContent>
-              {!isAuthorized ? (
-                <div className="p-4 text-sm text-muted-foreground">
-                  <p>Admin access is locked. Please sign in with the club admin email and password.</p>
-                  {(!import.meta.env.VITE_ADMIN_EMAIL && !import.meta.env.VITE_ADMIN_EMAIL_DOMAIN) && (
-                    <p className="mt-2">Tip: set VITE_ADMIN_EMAIL or VITE_ADMIN_EMAIL_DOMAIN to restrict which account can access the admin.</p>
-                  )}
-                </div>
-              ) : (
-              <Tabs
-                value={active}
-                onValueChange={(v) => {
-                  setActive(v as Entity);
-                  // Scroll to top instantly when tab changes
-                  window.scrollTo(0, 0);
-                }}
-              >
-                {!isAdminApp ? (
-                  <TabsList className="flex flex-wrap">
-                    <TabsTrigger value="courses">Courses</TabsTrigger>
-                    <TabsTrigger value="events">Events</TabsTrigger>
-                    <TabsTrigger value="team_members">Team</TabsTrigger>
-                    <TabsTrigger value="gallery_items">Gallery</TabsTrigger>
-                    <TabsTrigger value="blog_posts">Blog</TabsTrigger>
-                    <TabsTrigger value="memberships">Memberships</TabsTrigger>
-                  </TabsList>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                    {/* Sidebar */}
-                    <aside className="md:col-span-3 lg:col-span-2">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-base">Sections</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-1">
-                          {[
-                            { key: "courses", label: "Courses", icon: BookOpen },
-                            { key: "events", label: "Events", icon: CalendarDays },
-                            { key: "team_members", label: "Team", icon: Users },
-                            { key: "gallery_items", label: "Gallery", icon: Images },
-                            { key: "blog_posts", label: "Blog", icon: FileText },
-                            { key: "memberships", label: "Memberships", icon: IdCard },
-                          ].map((item) => {
-                            const Icon = item.icon as any;
-                            const activeItem = active === item.key;
-                            return (
-                              <button
-                                key={item.key}
-                                className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-2 transition-colors ${activeItem ? "bg-muted text-foreground" : "hover:bg-muted text-muted-foreground"}`}
-                                onClick={() => setActive(item.key as Entity)}
-                              >
-                                <Icon className="w-4 h-4" />
-                                <span>{item.label}</span>
-                              </button>
-                            );
-                          })}
-                        </CardContent>
-                      </Card>
-                    </aside>
-
-                    {/* Main */}
-                    <div className="md:col-span-9 lg:col-span-10">
-                      {(["courses", "events", "team_members", "gallery_items", "blog_posts"] as Entity[]).map((e) => (
-                        <TabsContent key={e} value={e}>
-                          <div className="grid md:grid-cols-3 gap-6 mt-0">
-                            <Card className="md:col-span-1">
-                              <CardHeader>
-                                <CardTitle>{form.id ? "Edit" : "Create"} {active.replace("_", " ")}</CardTitle>
-                              </CardHeader>
-                              <CardContent className="space-y-3">
-                                {columns.map((c) => (
-                                  <div key={c} className="space-y-1">
-                                    <label className="text-sm text-muted-foreground capitalize">{c.replace("_", " ")}</label>
-                                    <Input
-                                      value={String(form[c] ?? "")}
-                                      onChange={(e) => setForm({ ...form, [c]: e.target.value })}
-                                    />
-                                  </div>
-                                ))}
-                                <div className="flex gap-2">
-                                  <Button onClick={upsertRow} disabled={loading} className="bg-gradient-primary">
-                                    {form.id ? "Update" : "Create"}
-                                  </Button>
-                                  {form.id && (
-                                    <Button variant="secondary" onClick={() => setForm({})} disabled={loading}>Cancel</Button>
-                                  )}
-                                </div>
-                              </CardContent>
-                            </Card>
-
-                            <Card className="md:col-span-2">
-                              <CardHeader>
-                                <CardTitle>Manage {active.replace("_", " ")}</CardTitle>
-                              </CardHeader>
-                              <CardContent>
-                                {errorMsg ? (
-                                  <p className="text-red-500">{errorMsg}</p>
-                                ) : loading ? (
-                                  <p className="text-muted-foreground">Loading...</p>
-                                ) : rows.length === 0 ? (
-                                  <p className="text-muted-foreground">No records yet.</p>
-                                ) : (
-                                  <div className="overflow-x-auto">
-                                    <table className="w-full text-sm">
-                                      <thead className="sticky top-0 bg-background">
-                                        <tr>
-                                          {columns.map((c) => (
-                                            <th key={c} className="text-left p-2 capitalize">{c.replace("_", " ")}</th>
-                                          ))}
-                                          <th className="text-left p-2">Actions</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {rows.map((r) => (
-                                          <tr key={r.id} className="border-t border-border">
-                                            {columns.map((c) => (
-                                              <td key={c} className="p-2 break-words">{String(r[c] ?? "")}</td>
-                                            ))}
-                                            <td className="p-2 flex gap-2">
-                                              <Button size="sm" variant="secondary" onClick={() => editRow(r)}>Edit</Button>
-                                              <Button size="sm" variant="destructive" onClick={() => deleteRow(r.id)}>Delete</Button>
-                                            </td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                )}
-                              </CardContent>
-                            </Card>
-                          </div>
-                        </TabsContent>
-                      ))}
-                    </div>
+                {authMsg && <p className="text-sm text-muted-foreground">{authMsg}</p>}
+              </CardHeader>
+              <CardContent>
+                {!isAuthorized ? (
+                  <div className="p-4 text-sm text-muted-foreground">
+                    <p>Admin access is locked. Please sign in with the club admin email and password.</p>
+                    {(!import.meta.env.VITE_ADMIN_EMAIL && !import.meta.env.VITE_ADMIN_EMAIL_DOMAIN) && (
+                      <p className="mt-2">Tip: set VITE_ADMIN_EMAIL or VITE_ADMIN_EMAIL_DOMAIN to restrict which account can access the admin.</p>
+                    )}
                   </div>
-                )}
-                {!isAdminApp && (["courses", "events", "team_members", "gallery_items", "blog_posts"] as Entity[]).map((e) => (
-                  <TabsContent key={e} value={e}>
-                    <div className="grid md:grid-cols-3 gap-6 mt-6">
-                      <Card className="md:col-span-1">
-                        <CardHeader>
-                          <CardTitle>{form.id ? "Edit" : "Create"} {active.replace("_", " ")}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          {columns.map((c) => (
-                            <div key={c} className="space-y-1">
-                              <label className="text-sm text-muted-foreground capitalize">{c.replace("_", " ")}</label>
-                              <Input
-                                value={String(form[c] ?? "")}
-                                onChange={(e) => setForm({ ...form, [c]: e.target.value })}
-                              />
-                            </div>
-                          ))}
-                          <div className="flex gap-2">
-                            <Button onClick={upsertRow} disabled={loading} className="bg-gradient-primary">
-                              {form.id ? "Update" : "Create"}
-                            </Button>
-                            {form.id && (
-                              <Button variant="secondary" onClick={() => setForm({})} disabled={loading}>Cancel</Button>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
+                ) : (
+                  <Tabs value={active} onValueChange={(v) => setActive(v as Entity)}>
+                    <TabsList className="flex flex-wrap">
+                      <TabsTrigger value="courses">Courses</TabsTrigger>
+                      <TabsTrigger value="events">Events</TabsTrigger>
+                      <TabsTrigger value="team_members">Team</TabsTrigger>
+                      <TabsTrigger value="gallery_items">Gallery</TabsTrigger>
+                      <TabsTrigger value="blog_posts">Blog</TabsTrigger>
+                      <TabsTrigger value="memberships">Memberships</TabsTrigger>
+                    </TabsList>
+                    {(["courses", "events", "team_members", "gallery_items", "blog_posts"] as Entity[]).map((e) => (
+                      <TabsContent key={e} value={e}>
+                        <div className="grid md:grid-cols-3 gap-6 mt-6">
+                          <Card className="md:col-span-1">
+                            <CardHeader>
+                              <CardTitle>{form.id ? "Edit" : "Create"} {active.replace("_", " ")}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              {columns.map((c) => (
+                                <div key={c} className="space-y-1">
+                                  <label className="text-sm text-muted-foreground capitalize">{c.replace("_", " ")}</label>
+                                  <Input
+                                    value={String(form[c] ?? "")}
+                                    onChange={(e) => setForm({ ...form, [c]: e.target.value })}
+                                  />
+                                </div>
+                              ))}
+                              <div className="flex gap-2">
+                                <Button onClick={upsertRow} disabled={loading} className="bg-gradient-primary">
+                                  {form.id ? "Update" : "Create"}
+                                </Button>
+                                {form.id && (
+                                  <Button variant="secondary" onClick={() => setForm({})} disabled={loading}>Cancel</Button>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
 
-                      <Card className="md:col-span-2">
-                        <CardHeader>
-                          <CardTitle>Manage {active.replace("_", " ")}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          {errorMsg ? (
-                            <p className="text-red-500">{errorMsg}</p>
-                          ) : loading ? (
-                            <p className="text-muted-foreground">Loading...</p>
-                          ) : rows.length === 0 ? (
-                            <p className="text-muted-foreground">No records yet.</p>
-                          ) : (
-                            <div className="overflow-x-auto">
-                              <table className="w-full text-sm">
-                                <thead>
-                                  <tr>
-                                    {columns.map((c) => (
-                                      <th key={c} className="text-left p-2 capitalize">{c.replace("_", " ")}</th>
-                                    ))}
-                                    <th className="text-left p-2">Actions</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {rows.map((r) => (
-                                    <tr key={r.id} className="border-t border-border">
-                                      {columns.map((c) => (
-                                        <td key={c} className="p-2 break-words">{String(r[c] ?? "")}</td>
+                          <Card className="md:col-span-2">
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <CardTitle>Manage {active.replace("_", " ")}</CardTitle>
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    placeholder="Search..."
+                                    value={search}
+                                    onChange={(e) => {
+                                      setSearch(e.target.value);
+                                      setPage(1);
+                                    }}
+                                    className="w-40"
+                                  />
+                                  <Button size="sm" variant="secondary" onClick={() => setForm({})}>New</Button>
+                                  <Button size="sm" onClick={() => {
+                                    const cols = columns;
+                                    const rowsToExport = rows;
+                                    const header = cols.join(",");
+                                    const body = rowsToExport.map((r) => cols.map((c) => String(r[c] ?? "").replace(/"/g, '"')).join(",")).join("\n");
+                                    const csv = header + "\n" + body;
+                                    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                                    const url = URL.createObjectURL(blob);
+                                    const a = document.createElement("a");
+                                    a.href = url;
+                                    a.download = `${active}.csv`;
+                                    a.click();
+                                    URL.revokeObjectURL(url);
+                                  }}>Export CSV</Button>
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              {errorMsg ? (
+                                <p className="text-red-500">{errorMsg}</p>
+                              ) : loading ? (
+                                <p className="text-muted-foreground">Loading...</p>
+                              ) : rows.length === 0 ? (
+                                <p className="text-muted-foreground">No records yet.</p>
+                              ) : (
+                                <div className="overflow-x-auto">
+                                  <table className="w-full text-sm">
+                                    <thead>
+                                      <tr>
+                                        {columns.map((c) => (
+                                          <th key={c} className="text-left p-2 capitalize">{c.replace("_", " ")}</th>
+                                        ))}
+                                        <th className="text-left p-2">Actions</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {rows.map((r) => (
+                                        <tr key={r.id} className="border-t border-border">
+                                          {columns.map((c) => (
+                                            <td key={c} className="p-2 break-words">{String(r[c] ?? "")}</td>
+                                          ))}
+                                          <td className="p-2 flex gap-2">
+                                            <Button size="sm" variant="secondary" onClick={() => editRow(r)}>Edit</Button>
+                                            <Button size="sm" variant="destructive" onClick={() => deleteRow(r.id)}>Delete</Button>
+                                          </td>
+                                        </tr>
                                       ))}
-                                      <td className="p-2 flex gap-2">
-                                        <Button size="sm" variant="secondary" onClick={() => editRow(r)}>Edit</Button>
-                                        <Button size="sm" variant="destructive" onClick={() => deleteRow(r.id)}>Delete</Button>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </TabsContent>
-                ))}
-              </Tabs>
-              )}
-            </CardContent>
-          </Card>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </TabsContent>
+                    ))}
+                  </Tabs>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </section>
 

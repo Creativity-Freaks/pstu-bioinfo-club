@@ -60,11 +60,11 @@ const AboutPage = () => {
                 <div className="flex flex-wrap gap-4">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                    <span className="text-sm font-medium">150+ Active Members</span>
+                    <span className="text-sm font-medium">100+ Active Members</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-accent rounded-full animate-pulse" style={{ animationDelay: "0.5s" }} />
-                    <span className="text-sm font-medium">50+ Research Projects</span>
+                    <span className="text-sm font-medium">10+ Research Projects</span>
                   </div>
                 </div>
               </div>

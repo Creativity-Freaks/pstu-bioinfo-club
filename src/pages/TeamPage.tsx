@@ -142,7 +142,7 @@ const TeamPage = () => {
                   <Users className="w-6 h-6 text-primary animate-float" />
                 </div>
                 <div className="text-left">
-                  <div className="font-bold text-lg">150+</div>
+                  <div className="font-bold text-lg">100+</div>
                   <div className="text-muted-foreground text-xs">Team Members</div>
                 </div>
               </div>

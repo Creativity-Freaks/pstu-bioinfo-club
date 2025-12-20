@@ -5,9 +5,9 @@ import heroImage from "@/assets/hero-bg.jpg";
 
 const HeroPreview = () => {
   const stats = [
-    { icon: Users, value: "150+", label: "Members" },
-    { icon: Calendar, value: "50+", label: "Events" },
-    { icon: GraduationCap, value: "100+", label: "Workshops" }
+    { icon: Users, value: "100+", label: "Members" },
+    { icon: Calendar, value: "10+", label: "Events" },
+    { icon: GraduationCap, value: "2+", label: "Workshops" }
   ];
 
   return (

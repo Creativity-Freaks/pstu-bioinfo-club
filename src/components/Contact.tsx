@@ -2,12 +2,61 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Facebook, Linkedin, Mail, MapPin, Phone } from "lucide-react";
 
 const Contact = () => {
-  const handleSubmit = (e: React.FormEvent) => {
+  const { toast } = useToast();
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    studentId: "",
+    message: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
+    if (!form.name || !form.email || !form.message) {
+      toast({ title: "Missing fields", description: "Please fill name, email and message.", variant: "destructive" as any });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      // Insert into Supabase
+      const { error: dbError } = await supabase.from("contact_messages").insert({
+        name: form.name,
+        email: form.email,
+        student_id: form.studentId || null,
+        message: form.message,
+      });
+      if (dbError) throw new Error(dbError.message);
+
+      const payload = {
+        type: "contact",
+        name: form.name,
+        email: form.email,
+        subject: "New contact message",
+        message: `Student ID: ${form.studentId || "N/A"}\n\n${form.message}`,
+      };
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Failed to send message (${res.status})`);
+      }
+      toast({ title: "Message sent", description: "Thanks! We'll get back to you soon." });
+      setForm({ name: "", email: "", studentId: "", message: "" });
+    } catch (err: any) {
+      toast({ title: "Could not send", description: err?.message || String(err), variant: "destructive" as any });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -33,6 +82,8 @@ const Contact = () => {
                   <Input
                     placeholder="Your full name"
                     className="w-full"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
                   />
                 </div>
                 <div>
@@ -41,6 +92,8 @@ const Contact = () => {
                     type="email"
                     placeholder="your.email@example.com"
                     className="w-full"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
                   />
                 </div>
                 <div>
@@ -48,6 +101,8 @@ const Contact = () => {
                   <Input
                     placeholder="Your student ID"
                     className="w-full"
+                    value={form.studentId}
+                    onChange={(e) => setForm({ ...form, studentId: e.target.value })}
                   />
                 </div>
                 <div>
@@ -55,10 +110,12 @@ const Contact = () => {
                   <Textarea
                     placeholder="Tell us about your interest in bioinformatics..."
                     className="w-full min-h-[120px]"
+                    value={form.message}
+                    onChange={(e) => setForm({ ...form, message: e.target.value })}
                   />
                 </div>
-                <Button type="submit" className="w-full bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-elegant hover:shadow-glow" size="lg">
-                  Send Message
+                <Button type="submit" className="w-full bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-elegant hover:shadow-glow" size="lg" disabled={submitting}>
+                  {submitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </CardContent>
