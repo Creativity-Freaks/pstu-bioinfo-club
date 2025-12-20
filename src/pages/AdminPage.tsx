@@ -42,6 +42,7 @@ const AdminPage = () => {
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>("");
 
   const columnsByEntity: Record<Entity, string[]> = {
     dashboard: [],
@@ -90,19 +91,40 @@ const AdminPage = () => {
       setErrorMsg(null);
       setUploadingImage(true);
       const bucket = "gallery";
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const filePath = `gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error: upErr } = await supabase.storage.from(bucket).upload(filePath, file, {
-        upsert: true,
-        cacheControl: "3600",
+      // Request a signed upload URL from the server (uses service role)
+      const res = await fetch("/api/gallery-upload-url", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
       });
-      if (upErr) {
-        throw upErr;
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(t || "Failed to create signed upload URL");
       }
-      const { data: pub } = await supabase.storage.from(bucket).getPublicUrl(filePath);
+      const { path, token } = await res.json();
+      if (!path || !token) throw new Error("Invalid signed upload response");
+
+      // Upload the file using the signed URL (no RLS required on client)
+      const { error: upErr } = await supabase.storage.from(bucket).uploadToSignedUrl(path, token, file);
+      if (upErr) throw upErr;
+
+      // Try to get a public URL for preview if the bucket is public.
+      const { data: pub } = await supabase.storage.from(bucket).getPublicUrl(path);
       const url = pub?.publicUrl || "";
-      if (!url) throw new Error("Could not retrieve public URL for uploaded image.");
-      setForm({ ...form, image_url: url });
+      // Store path if private; use signed preview URL for immediate display
+      setForm({ ...form, image_url: url || path });
+      setImagePreviewUrl(url);
+      if (!url) {
+        const viewRes = await fetch("/api/gallery-signed-view", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ path, bucket, expiresIn: 3600 }),
+        });
+        if (viewRes.ok) {
+          const { signedUrl } = await viewRes.json();
+          if (signedUrl) setImagePreviewUrl(signedUrl);
+        }
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setErrorMsg(msg);
@@ -381,12 +403,12 @@ const AdminPage = () => {
                                                 }}
                                               />
                                               <Button type="button" disabled={uploadingImage} onClick={() => {}}>
-                                                {uploadingImage ? "Uploading..." : "Upload to Supabase"}
+                                                {uploadingImage ? "Uploading..." : "Upload Image"}
                                               </Button>
                                             </div>
-                                            {form.image_url && (
+                                            {(form.image_url || imagePreviewUrl) && (
                                               <div className="mt-2">
-                                                <img src={String(form.image_url)} alt="Preview" className="h-24 rounded object-cover border" />
+                                                <img src={String(imagePreviewUrl || form.image_url)} alt="Preview" className="h-24 rounded object-cover border" />
                                               </div>
                                             )}
                                           </div>

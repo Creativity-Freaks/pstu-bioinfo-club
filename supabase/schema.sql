@@ -121,3 +121,41 @@ create table if not exists public.memberships (
 
 -- create policy if not exists "Authenticated write blog" on public.blog_posts for insert with check (auth.role() = 'authenticated');
 -- create policy if not exists "Authenticated write blog upd" on public.blog_posts for update using (auth.role() = 'authenticated');
+
+-- ==========================================================
+-- RLS policies (enabled): allow required operations safely
+-- ==========================================================
+
+-- Public read access for site content
+-- (Skipped per preference: no policies)
+
+-- Allow anonymous inserts for contact messages (frontend uses anon key)
+-- (Skipped per preference: no policies)
+
+-- Allow anonymous inserts for memberships (join form)
+-- (Skipped per preference: no policies)
+
+-- Allow anonymous inserts for gallery items (admin UI without auth)
+-- (Skipped per preference: no policies)
+
+-- ----------------------------------------------------------
+-- Supabase Storage policies for 'gallery' bucket
+-- ----------------------------------------------------------
+-- Public can read objects from the 'gallery' bucket
+-- (Storage policies skipped; use server-side or UI toggle if needed)
+
+-- ==========================================================
+-- Alternative: disable RLS on selected tables (no policies)
+-- ==========================================================
+-- Run these in Supabase SQL Editor to allow inserts/selects
+ALTER TABLE public.memberships DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contact_messages DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.gallery_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.courses DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.events DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.team_members DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.blog_posts DISABLE ROW LEVEL SECURITY;
+
+-- Note: Storage doesn't support DISABLE RLS per bucket. If you want
+-- public image access without policies, use server-side proxy for uploads
+-- and downloads, or toggle bucket to "Public" in the UI (which creates policies).

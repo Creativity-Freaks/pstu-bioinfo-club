@@ -205,6 +205,35 @@ vercel env add VITE_ADMIN_EMAIL_DOMAIN preview
 
 Redeploy after updating envs.
 
+### Server-only envs for signed uploads
+
+For the Admin Gallery upload to bypass Storage RLS without policies, set server-only envs used by [api/gallery-upload-url.ts](api/gallery-upload-url.ts):
+
+```zsh
+# Same value as VITE_SUPABASE_URL
+vercel env add SUPABASE_URL development
+vercel env add SUPABASE_URL preview
+vercel env add SUPABASE_URL production
+
+# Service Role (from Supabase → Settings → API)
+vercel env add SUPABASE_SERVICE_ROLE_KEY development
+vercel env add SUPABASE_SERVICE_ROLE_KEY preview
+vercel env add SUPABASE_SERVICE_ROLE_KEY production
+```
+
+Local dev:
+
+```zsh
+cp .env.example .env
+# fill SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
+```
+
+Admin Gallery upload flow:
+
+- Client requests a signed upload URL from `/api/gallery-upload-url`.
+- Client calls `uploadToSignedUrl()` with the token; no Storage policies needed.
+- If the `gallery` bucket is Public, `getPublicUrl()` will return a preview URL; otherwise the stored path can be used with a signed-view endpoint.
+
 ## Deployment
 
 - Static hosting friendly (Netlify, Vercel, Cloudflare Pages, GitHub Pages).
