@@ -15,7 +15,7 @@ export function useSupabaseList<T extends Record<string, unknown>>(table: string
     queryKey: ["sb-list", table, orderBy, ascending, limit, eq],
     queryFn: async () => {
       if (!supabase) return [] as T[];
-      let q = supabase.from(table).select("*") as any;
+      let q = supabase.from(table).select("*");
       if (orderBy) q = q.order(orderBy, { ascending });
       if (typeof limit === "number") q = q.limit(limit);
       if (eq && Array.isArray(eq)) {

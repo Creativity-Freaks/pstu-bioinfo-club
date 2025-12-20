@@ -1,10 +1,22 @@
 import { Resend } from "resend";
 import nodemailer from "nodemailer";
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+// Ensure Vercel uses the Node.js runtime (not Edge) for SMTP/Resend
+export const config = { runtime: "nodejs" };
+
+type EmailPayload = {
+  type?: "contact" | "membership";
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+};
+type NodeReq = { method?: string; body?: EmailPayload };
+type NodeRes = { status: (code: number) => { json: (obj: Record<string, unknown>) => void } };
 
 // Vercel Serverless Function to send email notifications
 // Expects JSON body: { type?: "contact"|"membership", name, email, subject?, message }
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: NodeReq, res: NodeRes) {
   try {
     if (req.method !== "POST") {
       res.status(405).json({ error: "Method not allowed" });

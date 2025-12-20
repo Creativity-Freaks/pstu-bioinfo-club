@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useCallback, useEffect, useState } from "react";
+import type { ElementType } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BookOpen, CalendarDays, Users, Images, FileText, IdCard, LayoutDashboard, Mail } from "lucide-react";
 
@@ -89,7 +90,7 @@ const AdminPage = () => {
       next[e] = count;
     });
     setCounts(next);
-  }, [isAuthorized]);
+  }, [isAuthorized, counts]);
 
   useEffect(() => {
     loadRows();
@@ -259,7 +260,7 @@ const AdminPage = () => {
                             { key: "memberships", label: "Memberships", icon: IdCard },
                             { key: "contact_messages", label: "Contact Messages", icon: Mail },
                           ].map((item) => {
-                            const Icon = item.icon as any;
+                            const Icon = item.icon as ElementType;
                             const activeItem = active === item.key;
                             return (
                               <button
