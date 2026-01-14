@@ -27,7 +27,7 @@ const advisors: Advisor[] = [
   },
   {
     name: "Dr. Md. Rajib Sharker",
-    title: "Professor",
+    title: "Advisor",
     department:
       "Department of Fisheries Biology and Genetics, Faculty of Fisheries",
     office:
