@@ -45,6 +45,8 @@ const AdminPage = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>("");
 
+  const REQUEST_TIMEOUT_MS = 15_000;
+
   const slugify = (value: string) => {
     return value
       .toLowerCase()
@@ -112,7 +114,7 @@ const AdminPage = () => {
     }
     // Likely HTML (Vite dev server or SPA fallback)
     if (text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")) {
-      return "API route not available. If running locally, use `vercel dev` or enable direct Supabase fallback.";
+      return "API route returned HTML (likely a rewrite). In production, ensure /api/* routes are not rewritten to index.html and SUPABASE_SERVICE_ROLE_KEY is set.";
     }
     return text || `Request failed (${res.status})`;
   };
@@ -135,19 +137,52 @@ const AdminPage = () => {
       setRows([]);
       return;
     }
+
+    // 'dashboard' is a UI-only section, not a database table
+    if (active === "dashboard") {
+      setErrorMsg(null);
+      setRows([]);
+      return;
+    }
+
     if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
       setErrorMsg("Supabase environment variables are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
       return;
     }
     setErrorMsg(null);
     setLoading(true);
-    const { data, error } = await supabase.from(active).select("*").order("id", { ascending: false });
-    setLoading(false);
-    if (error) {
-      setErrorMsg(error.message);
-      return;
+
+    let finished = false;
+    const timeout = window.setTimeout(() => {
+      if (finished) return;
+      setLoading(false);
+      setErrorMsg(
+        "Request timed out. If this keeps happening in production, check Supabase project status (not paused) and verify Vercel env vars for VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY."
+      );
+    }, REQUEST_TIMEOUT_MS);
+
+    try {
+      const { data, error } = await supabase.from(active).select("*").order("id", { ascending: false });
+      finished = true;
+      window.clearTimeout(timeout);
+      setLoading(false);
+      if (error) {
+        const status = (error as unknown as { status?: number }).status;
+        if (status === 503) {
+          setErrorMsg("Supabase is temporarily unavailable (503). Please wait a moment and try again.");
+        } else {
+          setErrorMsg(error.message);
+        }
+        return;
+      }
+      setRows((data as Row[]) || []);
+    } catch (e) {
+      finished = true;
+      window.clearTimeout(timeout);
+      setLoading(false);
+      const msg = e instanceof Error ? e.message : String(e);
+      setErrorMsg(msg);
     }
-    setRows((data as Row[]) || []);
   }, [active, isAuthorized]);
 
   const handleGalleryImageUpload = async (file: File) => {
@@ -356,17 +391,29 @@ const AdminPage = () => {
 
     const tryClientUpsert = async (reason: string) => {
       const { error } = await supabase.from(active).upsert(payload).select();
-      if (error) throw new Error(error.message);
+      if (error) {
+        const msg = error.message || "Client write failed";
+        if (/row-level security|permission denied|not allowed|jwt/i.test(msg)) {
+          throw new Error(
+            "Client-side create/update is blocked by Supabase RLS/permissions. In production you should use the /api/admin-upsert serverless route with SUPABASE_SERVICE_ROLE_KEY set in Vercel env vars (or disable RLS for these tables)."
+          );
+        }
+        throw new Error(msg);
+      }
       return { ok: true, reason };
     };
 
     try {
       // Prefer serverless (service role) in production
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
       const res = await fetch("/api/admin-upsert", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ table: active, payload }),
+        signal: controller.signal,
       });
+      window.clearTimeout(timeout);
       if (!res.ok) {
         const msg = await parseApiError(res);
 
@@ -381,7 +428,11 @@ const AdminPage = () => {
     } catch (e) {
       // Network error → fallback to client upsert (works when RLS is disabled)
       try {
-        await tryClientUpsert("Network error calling API");
+        if (e instanceof DOMException && e.name === "AbortError") {
+          await tryClientUpsert("Timed out calling /api/admin-upsert");
+        } else {
+          await tryClientUpsert("Network error calling API");
+        }
       } catch (inner) {
         const msg = inner instanceof Error ? inner.message : String(inner);
         setLoading(false);
@@ -407,15 +458,27 @@ const AdminPage = () => {
     setLoading(true);
     const tryClientDelete = async () => {
       const { error } = await supabase.from(active).delete().eq("id", id);
-      if (error) throw new Error(error.message);
+      if (error) {
+        const msg = error.message || "Client delete failed";
+        if (/row-level security|permission denied|not allowed|jwt/i.test(msg)) {
+          throw new Error(
+            "Client-side delete is blocked by Supabase RLS/permissions. In production you should use the /api/admin-delete serverless route with SUPABASE_SERVICE_ROLE_KEY set in Vercel env vars (or disable RLS for these tables)."
+          );
+        }
+        throw new Error(msg);
+      }
     };
 
     try {
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
       const res = await fetch("/api/admin-delete", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ table: active, id }),
+        signal: controller.signal,
       });
+      window.clearTimeout(timeout);
       if (!res.ok) {
         const msg = await parseApiError(res);
         const shouldFallback = res.status === 404 || res.status === 405 || /Missing SUPABASE_SERVICE_ROLE_KEY/i.test(msg);
@@ -425,9 +488,12 @@ const AdminPage = () => {
           throw new Error(msg);
         }
       }
-    } catch {
+    } catch (e) {
       // Network error → fallback
       try {
+        if (e instanceof DOMException && e.name === "AbortError") {
+          // fall through to client delete
+        }
         await tryClientDelete();
       } catch (inner) {
         const msg = inner instanceof Error ? inner.message : String(inner);
