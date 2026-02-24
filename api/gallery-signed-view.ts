@@ -5,6 +5,17 @@ import { createClient } from '@supabase/supabase-js';
 
 export const config = { runtime: 'nodejs' };
 
+const UPSTREAM_TIMEOUT_MS = 12_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(message)), ms);
+    }),
+  ]);
+}
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -38,12 +49,17 @@ export default async function handler(request: Request): Promise<Response> {
 
     if (!path) return json({ error: 'Missing path' }, 400);
 
-    const { data, error } = await admin.storage.from(bucket).createSignedUrl(path, expiresIn);
+    const { data, error } = await withTimeout(
+      admin.storage.from(bucket).createSignedUrl(path, expiresIn),
+      UPSTREAM_TIMEOUT_MS,
+      'Supabase Storage timed out while creating signed view URL'
+    );
     if (error || !data) return json({ error: error?.message || 'Failed to create signed view URL', details: { bucket, path } }, 500);
 
     return json({ signedUrl: data.signedUrl, path, bucket, expiresIn });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return json({ error: msg }, 500);
+    const status = /timed out/i.test(msg) ? 504 : 500;
+    return json({ error: msg }, status);
   }
 }

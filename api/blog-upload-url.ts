@@ -5,6 +5,17 @@ import { createClient } from "@supabase/supabase-js";
 
 export const config = { runtime: "nodejs" };
 
+const UPSTREAM_TIMEOUT_MS = 12_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(message)), ms);
+    }),
+  ]);
+}
+
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -52,14 +63,27 @@ export default async function handler(request: Request): Promise<Response> {
 
     // Ensure bucket exists (create if missing)
     try {
-      const { data: buckets } = await admin.storage.listBuckets();
+      const { data: buckets } = await withTimeout(
+        admin.storage.listBuckets(),
+        UPSTREAM_TIMEOUT_MS,
+        "Supabase Storage timed out while listing buckets"
+      );
       const exists = (buckets || []).some((b) => b.name === bucket);
       if (!exists) {
-        await admin.storage.createBucket(bucket, { public: true });
+        await withTimeout(
+          admin.storage.createBucket(bucket, { public: true }),
+          UPSTREAM_TIMEOUT_MS,
+          "Supabase Storage timed out while creating bucket"
+        );
       } else {
         try {
           // @ts-expect-error typings may differ across supabase-js versions
-          await admin.storage.updateBucket(bucket, { public: true });
+          await withTimeout(
+            // @ts-expect-error typings may differ across supabase-js versions
+            admin.storage.updateBucket(bucket, { public: true }),
+            UPSTREAM_TIMEOUT_MS,
+            "Supabase Storage timed out while updating bucket"
+          );
         } catch {
           // ignore
         }
@@ -72,9 +96,13 @@ export default async function handler(request: Request): Promise<Response> {
     const safeExt = ext.replace(/[^a-z0-9]/g, "").slice(0, 10) || "bin";
     const path = `blog/${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
 
-    const { data, error } = await admin.storage.from(bucket).createSignedUploadUrl(path, {
-      upsert: true,
-    });
+    const { data, error } = await withTimeout(
+      admin.storage.from(bucket).createSignedUploadUrl(path, {
+        upsert: true,
+      }),
+      UPSTREAM_TIMEOUT_MS,
+      "Supabase Storage timed out while creating signed upload URL"
+    );
 
     if (error || !data) {
       return jsonResponse({ error: error?.message || "Failed to create signed upload URL", details: { bucket, path } }, 500);
@@ -83,6 +111,7 @@ export default async function handler(request: Request): Promise<Response> {
     return jsonResponse({ bucket, path, token: data.token });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return jsonResponse({ error: msg }, 500);
+    const status = /timed out/i.test(msg) ? 504 : 500;
+    return jsonResponse({ error: msg }, status);
   }
 }
