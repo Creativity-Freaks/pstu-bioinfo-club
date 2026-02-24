@@ -55,6 +55,68 @@ const AdminPage = () => {
       .slice(0, 80);
   };
 
+  const preparePayload = (entity: Entity, input: Row): Row => {
+    const payload: Row = { ...input };
+
+    // Avoid writing server-managed columns
+    delete payload.created_at;
+
+    // Normalize empty strings for optional fields
+    const nullIfBlank = (v: unknown) => {
+      if (typeof v !== "string") return v;
+      const t = v.trim();
+      return t === "" ? null : t;
+    };
+
+    if (entity === "blog_posts") {
+      payload["slug"] = nullIfBlank(payload["slug"]);
+      payload["excerpt"] = nullIfBlank(payload["excerpt"]);
+      payload["content"] = nullIfBlank(payload["content"]);
+      payload["image_url"] = nullIfBlank(payload["image_url"]);
+      payload["author"] = nullIfBlank(payload["author"]);
+      payload["category"] = nullIfBlank(payload["category"]);
+      if (typeof payload.title === "string") payload.title = payload.title.trim();
+    }
+
+    if (entity === "courses") {
+      if (typeof payload.title === "string") payload.title = payload.title.trim();
+      const raw = payload.modules;
+      if (raw === "" || raw === null || typeof raw === "undefined") {
+        payload.modules = null;
+      } else if (typeof raw === "string") {
+        const n = Number(raw);
+        payload.modules = Number.isFinite(n) ? n : raw;
+      }
+    }
+
+    if (entity === "events") {
+      if (typeof payload.title === "string") payload.title = payload.title.trim();
+    }
+    if (entity === "team_members") {
+      if (typeof payload.name === "string") payload.name = payload.name.trim();
+    }
+
+    return payload;
+  };
+
+  const parseApiError = async (res: Response) => {
+    const text = await res.text();
+    try {
+      const j = JSON.parse(text);
+      if (j && typeof j === "object") {
+        const msg = (j.error && String(j.error)) || (j.message && String(j.message));
+        if (msg) return msg;
+      }
+    } catch {
+      // ignore
+    }
+    // Likely HTML (Vite dev server or SPA fallback)
+    if (text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")) {
+      return "API route not available. If running locally, use `vercel dev` or enable direct Supabase fallback.";
+    }
+    return text || `Request failed (${res.status})`;
+  };
+
   const columnsByEntity: Record<Entity, string[]> = {
     dashboard: [],
     courses: ["title", "description", "duration", "level", "modules"],
@@ -290,19 +352,45 @@ const AdminPage = () => {
     }
     setErrorMsg(null);
     setLoading(true);
-    const payload = { ...form };
-    // Route admin writes through server to bypass RLS
-    const res = await fetch("/api/admin-upsert", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ table: active, payload }),
-    });
-    const { error } = res.ok ? { error: null } : { error: new Error(await res.text()) };
-    setLoading(false);
-    if (error) {
-      setErrorMsg(error.message);
-      return;
+    const payload = preparePayload(active, form);
+
+    const tryClientUpsert = async (reason: string) => {
+      const { error } = await supabase.from(active).upsert(payload).select();
+      if (error) throw new Error(error.message);
+      return { ok: true, reason };
+    };
+
+    try {
+      // Prefer serverless (service role) in production
+      const res = await fetch("/api/admin-upsert", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ table: active, payload }),
+      });
+      if (!res.ok) {
+        const msg = await parseApiError(res);
+
+        // If API isn't available (common on local `vite dev`) or server is missing env, fallback to client
+        const shouldFallback = res.status === 404 || res.status === 405 || /Missing SUPABASE_SERVICE_ROLE_KEY/i.test(msg);
+        if (shouldFallback) {
+          await tryClientUpsert(msg);
+        } else {
+          throw new Error(msg);
+        }
+      }
+    } catch (e) {
+      // Network error → fallback to client upsert (works when RLS is disabled)
+      try {
+        await tryClientUpsert("Network error calling API");
+      } catch (inner) {
+        const msg = inner instanceof Error ? inner.message : String(inner);
+        setLoading(false);
+        setErrorMsg(msg);
+        return;
+      }
     }
+
+    setLoading(false);
     setForm({});
     loadRows();
     loadCounts();
@@ -317,17 +405,39 @@ const AdminPage = () => {
     }
     setErrorMsg(null);
     setLoading(true);
-    const res = await fetch("/api/admin-delete", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ table: active, id }),
-    });
-    const { error } = res.ok ? { error: null } : { error: new Error(await res.text()) };
-    setLoading(false);
-    if (error) {
-      setErrorMsg(error.message);
-      return;
+    const tryClientDelete = async () => {
+      const { error } = await supabase.from(active).delete().eq("id", id);
+      if (error) throw new Error(error.message);
+    };
+
+    try {
+      const res = await fetch("/api/admin-delete", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ table: active, id }),
+      });
+      if (!res.ok) {
+        const msg = await parseApiError(res);
+        const shouldFallback = res.status === 404 || res.status === 405 || /Missing SUPABASE_SERVICE_ROLE_KEY/i.test(msg);
+        if (shouldFallback) {
+          await tryClientDelete();
+        } else {
+          throw new Error(msg);
+        }
+      }
+    } catch {
+      // Network error → fallback
+      try {
+        await tryClientDelete();
+      } catch (inner) {
+        const msg = inner instanceof Error ? inner.message : String(inner);
+        setLoading(false);
+        setErrorMsg(msg);
+        return;
+      }
     }
+
+    setLoading(false);
     loadRows();
     loadCounts();
   };
