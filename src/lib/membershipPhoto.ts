@@ -42,7 +42,7 @@ async function uploadMembershipPhotoDirect(file: File, opts?: { expiresIn?: numb
   return {
     bucket,
     path,
-    storedValue: path,
+    storedValue: publicUrl || path,
     previewUrl,
   };
 }
@@ -104,7 +104,7 @@ export async function uploadMembershipPhoto(file: File, opts?: { expiresIn?: num
     return {
       bucket,
       path,
-      storedValue: path,
+      storedValue: publicUrl || path,
       previewUrl,
     };
   } catch (err) {

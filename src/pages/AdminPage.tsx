@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ElementType } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BookOpen, CalendarDays, Users, Images, FileText, IdCard, LayoutDashboard, Mail } from "lucide-react";
@@ -49,6 +49,88 @@ const AdminPage = () => {
 
   const GALLERY_FILE_INPUT_ID = "admin-gallery-image-file";
   const BLOG_FILE_INPUT_ID = "admin-blog-image-file";
+
+  const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
+  const pendingImageObjectUrlRef = useRef<string>("");
+
+  const clearPendingImage = useCallback(() => {
+    setPendingImageFile(null);
+    if (pendingImageObjectUrlRef.current) {
+      try {
+        URL.revokeObjectURL(pendingImageObjectUrlRef.current);
+      } catch {
+        // ignore
+      }
+      pendingImageObjectUrlRef.current = "";
+    }
+  }, []);
+
+  const selectPendingImage = useCallback(
+    (file: File | undefined) => {
+      if (!file) return;
+      setErrorMsg(null);
+      clearPendingImage();
+      setPendingImageFile(file);
+      if (typeof URL !== "undefined") {
+        const objectUrl = URL.createObjectURL(file);
+        pendingImageObjectUrlRef.current = objectUrl;
+        setImagePreviewUrl(objectUrl);
+      }
+    },
+    [clearPendingImage]
+  );
+
+  const uploadImageForEntity = useCallback(
+    async (entity: Entity, file: File) => {
+      if (!file) throw new Error("No file selected");
+      if (!isAuthorized) throw new Error("Admin access is restricted. Please sign in.");
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        throw new Error("Supabase environment variables are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+      }
+
+      const isGallery = entity === "gallery_items";
+      const api = isGallery ? "/api/gallery-upload-url" : "/api/blog-upload-url";
+      const defaultBucket = isGallery ? "gallery" : "blog";
+
+      const uploadUrlController = new AbortController();
+      const uploadUrlTimeout = window.setTimeout(() => uploadUrlController.abort(), REQUEST_TIMEOUT_MS);
+      const res = await fetch(api, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
+        signal: uploadUrlController.signal,
+      });
+      window.clearTimeout(uploadUrlTimeout);
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        throw new Error(t || "Failed to create signed upload URL");
+      }
+
+      const body = (await res.json().catch(() => ({}))) as { path?: string; token?: string; bucket?: string };
+      const path = typeof body.path === "string" ? body.path : "";
+      const token = typeof body.token === "string" ? body.token : "";
+      const bucketName = typeof body.bucket === "string" && body.bucket ? body.bucket : defaultBucket;
+      if (!path || !token) throw new Error("Invalid signed upload response");
+
+      const uploadPromise = supabase.storage.from(bucketName).uploadToSignedUrl(path, token, file);
+      const uploadTimeoutPromise = new Promise<never>((_, reject) =>
+        window.setTimeout(() => reject(new Error("Upload timed out. Please try again.")), REQUEST_TIMEOUT_MS)
+      );
+      const { error: upErr } = await Promise.race([uploadPromise, uploadTimeoutPromise]);
+      if (upErr) throw upErr;
+
+      const { data: pub } = await supabase.storage.from(bucketName).getPublicUrl(path);
+      const publicUrl = pub?.publicUrl ? String(pub.publicUrl) : "";
+
+      return {
+        bucket: bucketName,
+        path,
+        storedValue: publicUrl || path,
+        publicUrl,
+      };
+    },
+    [isAuthorized]
+  );
 
   const slugify = (value: string) => {
     return value
@@ -188,165 +270,9 @@ const AdminPage = () => {
     }
   }, [active, isAuthorized]);
 
-  const handleGalleryImageUpload = async (file: File) => {
-    if (!file) return;
-    if (!isAuthorized) {
-      setErrorMsg("Admin access is restricted. Please sign in.");
-      return;
-    }
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      setErrorMsg("Supabase environment variables are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
-      return;
-    }
-    try {
-      setErrorMsg(null);
-      setUploadingImage(true);
-      const bucket = "gallery";
-      // Request a signed upload URL from the server (uses service role)
-      const uploadUrlController = new AbortController();
-      const uploadUrlTimeout = window.setTimeout(() => uploadUrlController.abort(), REQUEST_TIMEOUT_MS);
-      const res = await fetch("/api/gallery-upload-url", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
-        signal: uploadUrlController.signal,
-      });
-      window.clearTimeout(uploadUrlTimeout);
-      if (!res.ok) {
-        const t = await res.text();
-        throw new Error(t || "Failed to create signed upload URL");
-      }
-      const { path, token } = await res.json();
-      if (!path || !token) throw new Error("Invalid signed upload response");
+  // Image upload is deferred until Create/Update.
 
-      // Upload the file using the signed URL (no RLS required on client)
-      const uploadPromise = supabase.storage.from(bucket).uploadToSignedUrl(path, token, file);
-      const uploadTimeoutPromise = new Promise<never>((_, reject) =>
-        window.setTimeout(() => reject(new Error("Upload timed out. Please try again.")), REQUEST_TIMEOUT_MS)
-      );
-      const { error: upErr } = await Promise.race([uploadPromise, uploadTimeoutPromise]);
-      if (upErr) throw upErr;
-
-      // Try to get a public URL for preview if the bucket is public.
-      const { data: pub } = await supabase.storage.from(bucket).getPublicUrl(path);
-      const url = pub?.publicUrl || "";
-
-      // Always store the Storage path (works for private buckets).
-      setForm({ ...form, image_url: path });
-
-      // Always try to show a signed preview (best for private buckets).
-      setImagePreviewUrl("");
-      try {
-        const viewController = new AbortController();
-        const viewTimeout = window.setTimeout(() => viewController.abort(), REQUEST_TIMEOUT_MS);
-        const viewRes = await fetch("/api/gallery-signed-view", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ path, bucket, expiresIn: 3600 }),
-          signal: viewController.signal,
-        });
-        window.clearTimeout(viewTimeout);
-        if (viewRes.ok) {
-          const { signedUrl } = await viewRes.json();
-          if (signedUrl) setImagePreviewUrl(String(signedUrl));
-          else if (url) setImagePreviewUrl(url);
-        } else if (url) {
-          setImagePreviewUrl(url);
-        }
-      } catch {
-        if (url) setImagePreviewUrl(url);
-      }
-    } catch (e) {
-      const msg =
-        e instanceof DOMException && e.name === "AbortError"
-          ? "Request timed out. Please try again."
-          : e instanceof Error
-            ? e.message
-            : String(e);
-      setErrorMsg(msg);
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
-  const handleBlogImageUpload = async (file: File) => {
-    if (!file) return;
-    if (!isAuthorized) {
-      setErrorMsg("Admin access is restricted. Please sign in.");
-      return;
-    }
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      setErrorMsg("Supabase environment variables are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
-      return;
-    }
-    try {
-      setErrorMsg(null);
-      setUploadingImage(true);
-
-      const uploadUrlController = new AbortController();
-      const uploadUrlTimeout = window.setTimeout(() => uploadUrlController.abort(), REQUEST_TIMEOUT_MS);
-      const res = await fetch("/api/blog-upload-url", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
-        signal: uploadUrlController.signal,
-      });
-      window.clearTimeout(uploadUrlTimeout);
-      if (!res.ok) {
-        const t = await res.text();
-        throw new Error(t || "Failed to create signed upload URL");
-      }
-      const { path, token, bucket } = await res.json();
-      if (!path || !token) throw new Error("Invalid signed upload response");
-
-      const bucketName = typeof bucket === "string" && bucket ? bucket : "blog";
-      const uploadPromise = supabase.storage.from(bucketName).uploadToSignedUrl(path, token, file);
-      const uploadTimeoutPromise = new Promise<never>((_, reject) =>
-        window.setTimeout(() => reject(new Error("Upload timed out. Please try again.")), REQUEST_TIMEOUT_MS)
-      );
-      const { error: upErr } = await Promise.race([uploadPromise, uploadTimeoutPromise]);
-      if (upErr) throw upErr;
-
-      const { data: pub } = await supabase.storage.from(bucketName).getPublicUrl(path);
-      const url = pub?.publicUrl || "";
-
-      // Always store the Storage path (works for private buckets).
-      setForm({ ...form, image_url: path });
-
-      // Always try to show a signed preview (best for private buckets).
-      setImagePreviewUrl("");
-      try {
-        const viewController = new AbortController();
-        const viewTimeout = window.setTimeout(() => viewController.abort(), REQUEST_TIMEOUT_MS);
-        const viewRes = await fetch("/api/gallery-signed-view", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ path, bucket: bucketName, expiresIn: 3600 }),
-          signal: viewController.signal,
-        });
-        window.clearTimeout(viewTimeout);
-        if (viewRes.ok) {
-          const { signedUrl } = await viewRes.json();
-          if (signedUrl) setImagePreviewUrl(String(signedUrl));
-          else if (url) setImagePreviewUrl(url);
-        } else if (url) {
-          setImagePreviewUrl(url);
-        }
-      } catch {
-        if (url) setImagePreviewUrl(url);
-      }
-    } catch (e) {
-      const msg =
-        e instanceof DOMException && e.name === "AbortError"
-          ? "Request timed out. Please try again."
-          : e instanceof Error
-            ? e.message
-            : String(e);
-      setErrorMsg(msg);
-    } finally {
-      setUploadingImage(false);
-    }
-  };
+  // Image upload is deferred until Create/Update.
 
   const loadCounts = useCallback(
     async (mode: "all" | "active" = "active") => {
@@ -715,7 +641,7 @@ const AdminPage = () => {
                                                 id={GALLERY_FILE_INPUT_ID}
                                                 onChange={(e) => {
                                                   const f = e.target.files?.[0];
-                                                  if (f) handleGalleryImageUpload(f);
+                                                  selectPendingImage(f);
                                                 }}
                                               />
                                               <Button
@@ -723,7 +649,7 @@ const AdminPage = () => {
                                                 disabled={uploadingImage}
                                                 onClick={() => document.getElementById(GALLERY_FILE_INPUT_ID)?.click()}
                                               >
-                                                {uploadingImage ? "Uploading..." : "Upload Image"}
+                                                {pendingImageFile ? "Image Selected" : "Choose Image"}
                                               </Button>
                                             </div>
                                             {(form.image_url || imagePreviewUrl) && (
@@ -746,7 +672,7 @@ const AdminPage = () => {
                                                 id={BLOG_FILE_INPUT_ID}
                                                 onChange={(e) => {
                                                   const f = e.target.files?.[0];
-                                                  if (f) handleBlogImageUpload(f);
+                                                  selectPendingImage(f);
                                                 }}
                                               />
                                               <Button
@@ -754,7 +680,7 @@ const AdminPage = () => {
                                                 disabled={uploadingImage}
                                                 onClick={() => document.getElementById(BLOG_FILE_INPUT_ID)?.click()}
                                               >
-                                                {uploadingImage ? "Uploading..." : "Upload Image"}
+                                                {pendingImageFile ? "Image Selected" : "Choose Image"}
                                               </Button>
                                             </div>
                                             {(form.image_url || imagePreviewUrl) && (

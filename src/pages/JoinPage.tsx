@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UserPlus } from "lucide-react";
@@ -18,6 +18,20 @@ const JoinPage = () => {
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string>("");
+  const [selectedPhotoFile, setSelectedPhotoFile] = useState<File | null>(null);
+  const selectedPhotoObjectUrlRef = useRef<string>("");
+
+  const clearSelectedPhoto = () => {
+    setSelectedPhotoFile(null);
+    if (selectedPhotoObjectUrlRef.current) {
+      try {
+        URL.revokeObjectURL(selectedPhotoObjectUrlRef.current);
+      } catch {
+        // ignore
+      }
+      selectedPhotoObjectUrlRef.current = "";
+    }
+  };
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,25 +44,38 @@ const JoinPage = () => {
     photoUrl: "",
   });
 
-  const onPhotoChange = async (file: File | undefined) => {
+  const onPhotoChange = (file: File | undefined) => {
     if (!file) return;
-    try {
-      setUploadingPhoto(true);
-      const result = await uploadMembershipPhoto(file, { expiresIn: 3600 });
-      setFormData((prev) => ({ ...prev, photoUrl: result.storedValue }));
-      setPhotoPreviewUrl(result.previewUrl);
-      toast({ title: "Photo uploaded", description: "Photo added to your application." });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      toast({ title: "Photo upload failed", description: msg, variant: "destructive" });
-    } finally {
-      setUploadingPhoto(false);
+    clearSelectedPhoto();
+    setSelectedPhotoFile(file);
+    if (typeof URL !== "undefined") {
+      const objectUrl = URL.createObjectURL(file);
+      selectedPhotoObjectUrlRef.current = objectUrl;
+      setPhotoPreviewUrl(objectUrl);
     }
   };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    let uploadedPhotoUrl = formData.photoUrl;
+    if (selectedPhotoFile) {
+      try {
+        setUploadingPhoto(true);
+        const result = await uploadMembershipPhoto(selectedPhotoFile, { expiresIn: 3600 });
+        uploadedPhotoUrl = result.storedValue;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setLoading(false);
+        setUploadingPhoto(false);
+        toast({ title: "Photo upload failed", description: msg, variant: "destructive" });
+        return;
+      } finally {
+        setUploadingPhoto(false);
+      }
+    }
+
     const { error } = await supabase.from("memberships").insert({
       name: formData.name,
       email: formData.email,
@@ -58,7 +85,7 @@ const JoinPage = () => {
       phone: formData.phone,
       bio: formData.bio,
       skills: formData.skills,
-      photo_url: formData.photoUrl || null,
+      photo_url: uploadedPhotoUrl || null,
     });
     setLoading(false);
     if (error) {
@@ -67,6 +94,7 @@ const JoinPage = () => {
     }
     toast({ title: "Application submitted", description: "We will get back to you soon." });
     setFormData({ name: "", email: "", studentId: "", department: "", year: "", phone: "", bio: "", skills: "", photoUrl: "" });
+    clearSelectedPhoto();
     setPhotoPreviewUrl("");
   };
 
@@ -168,7 +196,7 @@ const JoinPage = () => {
                         disabled={uploadingPhoto || loading}
                         onChange={(e) => {
                           const f = e.target.files?.[0];
-                          void onPhotoChange(f);
+                          onPhotoChange(f);
                         }}
                       />
                       {uploadingPhoto && (

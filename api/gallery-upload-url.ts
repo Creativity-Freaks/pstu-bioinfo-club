@@ -48,7 +48,14 @@ export default async function handler(request: Request): Promise<Response> {
       const { data: buckets } = await admin.storage.listBuckets();
       const exists = (buckets || []).some((b) => b.name === bucket);
       if (!exists) {
-        await admin.storage.createBucket(bucket, { public: false });
+        await admin.storage.createBucket(bucket, { public: true });
+      } else {
+        try {
+          // @ts-expect-error typings may differ across supabase-js versions
+          await admin.storage.updateBucket(bucket, { public: true });
+        } catch {
+          // ignore
+        }
       }
     } catch (e) {
       // Continue even if listing/creation fails; upload may still work if bucket exists

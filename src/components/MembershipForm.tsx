@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,26 +32,53 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string>("");
+  const [selectedPhotoFile, setSelectedPhotoFile] = useState<File | null>(null);
+  const selectedPhotoObjectUrlRef = useRef<string>("");
 
-  const onPhotoChange = async (file: File | undefined) => {
+  const clearSelectedPhoto = () => {
+    setSelectedPhotoFile(null);
+    if (selectedPhotoObjectUrlRef.current) {
+      try {
+        URL.revokeObjectURL(selectedPhotoObjectUrlRef.current);
+      } catch {
+        // ignore
+      }
+      selectedPhotoObjectUrlRef.current = "";
+    }
+  };
+
+  const onPhotoChange = (file: File | undefined) => {
     if (!file) return;
-    try {
-      setUploadingPhoto(true);
-      const result = await uploadMembershipPhoto(file, { expiresIn: 3600 });
-      setFormData((prev) => ({ ...prev, photoUrl: result.storedValue }));
-      setPhotoPreviewUrl(result.previewUrl);
-      toast({ title: "Photo uploaded", description: "Photo added to your application." });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      toast({ title: "Photo upload failed", description: msg, variant: "destructive" });
-    } finally {
-      setUploadingPhoto(false);
+    clearSelectedPhoto();
+    setSelectedPhotoFile(file);
+    if (typeof URL !== "undefined") {
+      const objectUrl = URL.createObjectURL(file);
+      selectedPhotoObjectUrlRef.current = objectUrl;
+      setPhotoPreviewUrl(objectUrl);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+
+    let uploadedPhotoUrl = formData.photoUrl;
+    if (selectedPhotoFile) {
+      try {
+        setUploadingPhoto(true);
+        const result = await uploadMembershipPhoto(selectedPhotoFile, { expiresIn: 3600 });
+        uploadedPhotoUrl = result.storedValue;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setUploadingPhoto(false);
+        setSubmitting(false);
+        toast({ title: "Photo upload failed", description: msg, variant: "destructive" });
+        return;
+      } finally {
+        setUploadingPhoto(false);
+      }
+    }
+
     const { error } = await supabase.from("memberships").insert({
       name: formData.name,
       email: formData.email,
@@ -61,7 +88,7 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
       phone: formData.phone,
       bio: formData.bio,
       skills: formData.skills,
-      photo_url: formData.photoUrl || null,
+      photo_url: uploadedPhotoUrl || null,
     });
     setSubmitting(false);
     if (error) {
@@ -76,8 +103,8 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
         name: formData.name,
         email: formData.email,
         subject: "New membership application",
-        message: `Student ID: ${formData.studentId}\nDepartment: ${formData.department}\nYear: ${formData.year}\nPhone: ${formData.phone}\nPhoto: ${formData.photoUrl || "N/A"}\n\nBio:\n${formData.bio}\n\nSkills:\n${formData.skills || "N/A"}`,
-        photoUrl: formData.photoUrl || undefined,
+        message: `Student ID: ${formData.studentId}\nDepartment: ${formData.department}\nYear: ${formData.year}\nPhone: ${formData.phone}\nPhoto: ${uploadedPhotoUrl || "N/A"}\n\nBio:\n${formData.bio}\n\nSkills:\n${formData.skills || "N/A"}`,
+        photoUrl: uploadedPhotoUrl || undefined,
       };
       const res = await fetch("/api/send-email", {
         method: "POST",
@@ -107,6 +134,7 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
       skills: "",
       photoUrl: "",
     });
+    clearSelectedPhoto();
     setPhotoPreviewUrl("");
     onOpenChange(false);
   };
@@ -251,7 +279,7 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
                 disabled={uploadingPhoto || submitting}
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  void onPhotoChange(f);
+                  onPhotoChange(f);
                 }}
               />
               {uploadingPhoto && (
@@ -261,7 +289,7 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
                 <div className="flex items-center gap-3">
                   <img src={photoPreviewUrl} alt="Selected profile" className="h-20 w-20 rounded-md object-cover border" />
                   <div className="text-sm text-muted-foreground">
-                    {formData.photoUrl ? "Photo attached" : ""}
+                    {selectedPhotoFile ? "Photo selected" : formData.photoUrl ? "Photo attached" : ""}
                   </div>
                 </div>
               )}
