@@ -42,65 +42,34 @@ function autoExcerpt(content?: string | null, maxLen = 180) {
   return text.slice(0, maxLen).replace(/\s+\S*$/, "").trim() + "…";
 }
 
-function useResolvedBlogImageUrl(imageUrl?: string | null) {
-  const [resolved, setResolved] = useState<string>("");
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const raw = String(imageUrl || "").trim();
-      if (!raw) {
-        setResolved("");
-        return;
-      }
-      if (/^https?:\/\//i.test(raw)) {
-        setResolved(raw);
-        return;
-      }
-      // private bucket path → resolve signed view URL
-      try {
-        const viewRes = await fetch("/api/gallery-signed-view", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ path: raw, bucket: "blog", expiresIn: 3600 }),
-        });
-        if (!viewRes.ok) return;
-        const { signedUrl } = await viewRes.json();
-        if (!cancelled && signedUrl) setResolved(String(signedUrl));
-      } catch {
-        // ignore
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [imageUrl]);
-
-  return resolved;
+function resolveImageUrl(raw: string | null | undefined, signedMap: Record<string, string>) {
+  const value = String(raw || "").trim();
+  if (!value) return "";
+  if (/^https?:\/\//i.test(value)) return value;
+  return signedMap[value] || "";
 }
 
-function FeaturedImage({ imageUrl, title }: { imageUrl?: string | null; title: string }) {
-  const resolved = useResolvedBlogImageUrl(imageUrl);
+function FeaturedImage({ imageUrl, title, signedMap }: { imageUrl?: string | null; title: string; signedMap: Record<string, string> }) {
+  const resolved = resolveImageUrl(imageUrl, signedMap);
   if (!resolved) return <span className="text-9xl animate-float">📚</span>;
   return (
-    <img
-      src={resolved}
-      alt={title}
-      className="w-full h-full max-h-[320px] object-cover rounded-md border border-white/10"
-    />
+    <img src={resolved} alt={title} className="w-full h-full max-h-[320px] object-cover rounded-md border border-white/10" />
   );
 }
 
-function CardImage({ imageUrl, title }: { imageUrl?: string | null; title: string }) {
-  const resolved = useResolvedBlogImageUrl(imageUrl);
+function CardImage({ imageUrl, title, signedMap }: { imageUrl?: string | null; title: string; signedMap: Record<string, string> }) {
+  const resolved = resolveImageUrl(imageUrl, signedMap);
   if (!resolved) {
-    return <div className="h-40 w-full rounded-md border bg-background flex items-center justify-center text-5xl">📄</div>;
+    return (
+      <div className="h-40 w-full rounded-md border bg-background flex items-center justify-center text-5xl">📄</div>
+    );
   }
   return <img src={resolved} alt={title} className="h-40 w-full object-cover rounded-md border" />;
 }
 
 const BlogPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All Posts");
+  const [signedBlogUrls, setSignedBlogUrls] = useState<Record<string, string>>({});
 
   const { data: dbPosts, isLoading: postsLoading, error: postsError } = useSupabaseList<BlogPost>("blog_posts", {
     orderBy: "created_at",
@@ -124,6 +93,42 @@ const BlogPage = () => {
   }, [dbPosts, selectedCategory]);
 
   const featured = filteredPosts.length ? filteredPosts[0] : null;
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const list = dbPosts ?? [];
+      const paths = Array.from(
+        new Set(
+          list
+            .map((p) => String(p.image_url || "").trim())
+            .filter((v) => v && !/^https?:\/\//i.test(v))
+        )
+      );
+
+      if (!paths.length) {
+        setSignedBlogUrls({});
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/storage-signed-views", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ bucket: "blog", paths, expiresIn: 3600 }),
+        });
+        if (!res.ok) return;
+        const j = await res.json();
+        const map = (j && typeof j === "object" && j.signedUrls && typeof j.signedUrls === "object") ? (j.signedUrls as Record<string, string>) : {};
+        if (!cancelled) setSignedBlogUrls(map);
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [dbPosts]);
 
   const stats = useMemo(() => {
     const list = dbPosts ?? [];
@@ -253,7 +258,7 @@ const BlogPage = () => {
             <Card className="overflow-hidden hover:shadow-elegant border-t-4 border-t-primary animate-fade-in transition-all duration-500 group">
               <div className="grid md:grid-cols-2">
                 <div className="bg-gradient-primary flex items-center justify-center p-12 group-hover:scale-105 transition-transform duration-500">
-                  <FeaturedImage imageUrl={featured.image_url} title={featured.title} />
+                  <FeaturedImage imageUrl={featured.image_url} title={featured.title} signedMap={signedBlogUrls} />
                 </div>
                 <CardContent className="p-8 flex flex-col justify-center">
                   <div className="flex items-center gap-3 mb-4">
@@ -317,7 +322,7 @@ const BlogPage = () => {
                 >
                   <CardHeader>
                     <div className="mb-4">
-                      <CardImage imageUrl={post.image_url} title={post.title} />
+                      <CardImage imageUrl={post.image_url} title={post.title} signedMap={signedBlogUrls} />
                     </div>
                     <div className="flex items-center gap-3 mb-3">
                       {post.category ? <Badge variant="outline">{post.category}</Badge> : <Badge variant="outline">Blog</Badge>}
