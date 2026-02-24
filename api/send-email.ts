@@ -17,6 +17,7 @@ type EmailPayload = {
   phone?: string;
   bio?: string;
   skills?: string;
+  photoUrl?: string;
 };
 type NodeReq = { method?: string; body?: EmailPayload };
 type NodeRes = { status: (code: number) => { json: (obj: Record<string, unknown>) => void } };
@@ -36,7 +37,7 @@ export default async function handler(req: NodeReq, res: NodeRes) {
       return;
     }
 
-    const { type = "contact", name, email, subject, message, studentId, department, year, phone, bio, skills } = req.body || {};
+    const { type = "contact", name, email, subject, message, studentId, department, year, phone, bio, skills, photoUrl } = req.body || {};
     if (!name || !email) {
       res.status(400).json({ error: "Missing required fields: name, email" });
       return;
@@ -49,6 +50,7 @@ export default async function handler(req: NodeReq, res: NodeRes) {
           <p style="margin: 0 0 4px">Department: <strong>${department ?? "N/A"}</strong></p>
           <p style="margin: 0 0 4px">Year: <strong>${year ?? "N/A"}</strong></p>
           <p style="margin: 0 0 4px">Phone: <strong>${phone ?? "N/A"}</strong></p>
+          ${photoUrl ? `<p style="margin: 0 0 4px">Photo: <strong>${photoUrl}</strong></p>` : ""}
           ${bio ? `<div style="margin-top:8px"><p style="margin:0 0 4px">Bio:</p><div style="padding:8px;background:#f7f7f8;border-radius:6px;white-space:pre-wrap">${bio}</div></div>` : ""}
           ${skills ? `<div style="margin-top:8px"><p style="margin:0 0 4px">Skills:</p><div style="padding:8px;background:#f7f7f8;border-radius:6px;white-space:pre-wrap">${skills}</div></div>` : ""}
         </div>` : "";

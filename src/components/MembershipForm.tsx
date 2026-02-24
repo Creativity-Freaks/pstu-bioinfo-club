@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { UserPlus, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadMembershipPhoto } from "@/lib/membershipPhoto";
 
 interface MembershipFormProps {
   open: boolean;
@@ -25,9 +26,28 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
     phone: "",
     bio: "",
     skills: "",
+    photoUrl: "",
   });
 
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string>("");
+
+  const onPhotoChange = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      setUploadingPhoto(true);
+      const result = await uploadMembershipPhoto(file, { expiresIn: 3600 });
+      setFormData((prev) => ({ ...prev, photoUrl: result.storedValue }));
+      setPhotoPreviewUrl(result.previewUrl);
+      toast({ title: "Photo uploaded", description: "Photo added to your application." });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast({ title: "Photo upload failed", description: msg, variant: "destructive" });
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +61,7 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
       phone: formData.phone,
       bio: formData.bio,
       skills: formData.skills,
+      photo_url: formData.photoUrl || null,
     });
     setSubmitting(false);
     if (error) {
@@ -55,7 +76,8 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
         name: formData.name,
         email: formData.email,
         subject: "New membership application",
-        message: `Student ID: ${formData.studentId}\nDepartment: ${formData.department}\nYear: ${formData.year}\nPhone: ${formData.phone}\n\nBio:\n${formData.bio}\n\nSkills:\n${formData.skills || "N/A"}`,
+        message: `Student ID: ${formData.studentId}\nDepartment: ${formData.department}\nYear: ${formData.year}\nPhone: ${formData.phone}\nPhoto: ${formData.photoUrl || "N/A"}\n\nBio:\n${formData.bio}\n\nSkills:\n${formData.skills || "N/A"}`,
+        photoUrl: formData.photoUrl || undefined,
       };
       const res = await fetch("/api/send-email", {
         method: "POST",
@@ -83,7 +105,9 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
       phone: "",
       bio: "",
       skills: "",
+      photoUrl: "",
     });
+    setPhotoPreviewUrl("");
     onOpenChange(false);
   };
 
@@ -217,9 +241,36 @@ const MembershipForm = ({ open, onOpenChange }: MembershipFormProps) => {
             />
           </div>
 
+          <div>
+            <Label htmlFor="photo">Profile Photo (Optional)</Label>
+            <div className="mt-2 flex flex-col gap-3">
+              <Input
+                id="photo"
+                type="file"
+                accept="image/*"
+                disabled={uploadingPhoto || submitting}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  void onPhotoChange(f);
+                }}
+              />
+              {uploadingPhoto && (
+                <p className="text-sm text-muted-foreground">Uploading photo...</p>
+              )}
+              {photoPreviewUrl && (
+                <div className="flex items-center gap-3">
+                  <img src={photoPreviewUrl} alt="Selected profile" className="h-20 w-20 rounded-md object-cover border" />
+                  <div className="text-sm text-muted-foreground">
+                    {formData.photoUrl ? "Photo attached" : ""}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="flex gap-3 pt-4">
-            <Button type="submit" className="flex-1 bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-elegant hover:shadow-glow" disabled={submitting}>
-              {submitting ? "Submitting..." : "Submit Application"}
+            <Button type="submit" className="flex-1 bg-gradient-primary hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-elegant hover:shadow-glow" disabled={submitting || uploadingPhoto}>
+              {submitting ? "Submitting..." : uploadingPhoto ? "Uploading photo..." : "Submit Application"}
             </Button>
             <Button
               type="button"

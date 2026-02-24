@@ -11,10 +11,13 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UserPlus } from "lucide-react";
+import { uploadMembershipPhoto } from "@/lib/membershipPhoto";
 
 const JoinPage = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string>("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -24,7 +27,24 @@ const JoinPage = () => {
     phone: "",
     bio: "",
     skills: "",
+    photoUrl: "",
   });
+
+  const onPhotoChange = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      setUploadingPhoto(true);
+      const result = await uploadMembershipPhoto(file, { expiresIn: 3600 });
+      setFormData((prev) => ({ ...prev, photoUrl: result.storedValue }));
+      setPhotoPreviewUrl(result.previewUrl);
+      toast({ title: "Photo uploaded", description: "Photo added to your application." });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast({ title: "Photo upload failed", description: msg, variant: "destructive" });
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +58,7 @@ const JoinPage = () => {
       phone: formData.phone,
       bio: formData.bio,
       skills: formData.skills,
+      photo_url: formData.photoUrl || null,
     });
     setLoading(false);
     if (error) {
@@ -45,7 +66,8 @@ const JoinPage = () => {
       return;
     }
     toast({ title: "Application submitted", description: "We will get back to you soon." });
-    setFormData({ name: "", email: "", studentId: "", department: "", year: "", phone: "", bio: "", skills: "" });
+    setFormData({ name: "", email: "", studentId: "", department: "", year: "", phone: "", bio: "", skills: "", photoUrl: "" });
+    setPhotoPreviewUrl("");
   };
 
   return (
@@ -135,13 +157,40 @@ const JoinPage = () => {
                     <Label htmlFor="bio">Why do you want to join? *</Label>
                     <Textarea id="bio" required value={formData.bio} onChange={(e) => setFormData({ ...formData, bio: e.target.value })} className="min-h-[100px]" />
                   </div>
+
+                  <div>
+                    <Label htmlFor="photo">Profile Photo (Optional)</Label>
+                    <div className="mt-2 flex flex-col gap-3">
+                      <Input
+                        id="photo"
+                        type="file"
+                        accept="image/*"
+                        disabled={uploadingPhoto || loading}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          void onPhotoChange(f);
+                        }}
+                      />
+                      {uploadingPhoto && (
+                        <p className="text-sm text-muted-foreground">Uploading photo...</p>
+                      )}
+                      {photoPreviewUrl && (
+                        <div className="flex items-center gap-3">
+                          <img src={photoPreviewUrl} alt="Selected profile" className="h-20 w-20 rounded-md object-cover border" />
+                          <div className="text-sm text-muted-foreground">
+                            {formData.photoUrl ? "Photo attached" : ""}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <div>
                     <Label htmlFor="skills">Your Skills (Optional)</Label>
                     <Textarea id="skills" value={formData.skills} onChange={(e) => setFormData({ ...formData, skills: e.target.value })} className="min-h-[80px]" />
                   </div>
 
-                  <Button type="submit" className="w-full bg-gradient-primary" disabled={loading}>
-                    {loading ? "Submitting..." : "Submit Application"}
+                  <Button type="submit" className="w-full bg-gradient-primary" disabled={loading || uploadingPhoto}>
+                    {loading ? "Submitting..." : uploadingPhoto ? "Uploading photo..." : "Submit Application"}
                   </Button>
                 </form>
               </CardContent>

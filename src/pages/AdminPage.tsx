@@ -51,7 +51,7 @@ const AdminPage = () => {
     team_members: ["name", "role", "bio", "avatar_url"],
     gallery_items: ["title", "image_url", "caption"],
     blog_posts: ["title", "slug", "excerpt", "content"],
-    memberships: ["name", "email", "student_id", "department", "year", "phone", "bio", "skills"],
+    memberships: ["name", "email", "student_id", "department", "year", "phone", "bio", "skills", "photo_url"],
     contact_messages: ["name", "email", "student_id", "message"],
   };
 

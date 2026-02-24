@@ -67,6 +67,7 @@ create table if not exists public.memberships (
    phone      text,
    bio        text,
    skills     text,
+   photo_url  text,
    created_at timestamp with time zone default now()
 );
 
