@@ -203,11 +203,15 @@ const AdminPage = () => {
       setUploadingImage(true);
       const bucket = "gallery";
       // Request a signed upload URL from the server (uses service role)
+      const uploadUrlController = new AbortController();
+      const uploadUrlTimeout = window.setTimeout(() => uploadUrlController.abort(), REQUEST_TIMEOUT_MS);
       const res = await fetch("/api/gallery-upload-url", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
+        signal: uploadUrlController.signal,
       });
+      window.clearTimeout(uploadUrlTimeout);
       if (!res.ok) {
         const t = await res.text();
         throw new Error(t || "Failed to create signed upload URL");
@@ -216,7 +220,11 @@ const AdminPage = () => {
       if (!path || !token) throw new Error("Invalid signed upload response");
 
       // Upload the file using the signed URL (no RLS required on client)
-      const { error: upErr } = await supabase.storage.from(bucket).uploadToSignedUrl(path, token, file);
+      const uploadPromise = supabase.storage.from(bucket).uploadToSignedUrl(path, token, file);
+      const uploadTimeoutPromise = new Promise<never>((_, reject) =>
+        window.setTimeout(() => reject(new Error("Upload timed out. Please try again.")), REQUEST_TIMEOUT_MS)
+      );
+      const { error: upErr } = await Promise.race([uploadPromise, uploadTimeoutPromise]);
       if (upErr) throw upErr;
 
       // Try to get a public URL for preview if the bucket is public.
@@ -229,11 +237,15 @@ const AdminPage = () => {
       // Always try to show a signed preview (best for private buckets).
       setImagePreviewUrl("");
       try {
+        const viewController = new AbortController();
+        const viewTimeout = window.setTimeout(() => viewController.abort(), REQUEST_TIMEOUT_MS);
         const viewRes = await fetch("/api/gallery-signed-view", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ path, bucket, expiresIn: 3600 }),
+          signal: viewController.signal,
         });
+        window.clearTimeout(viewTimeout);
         if (viewRes.ok) {
           const { signedUrl } = await viewRes.json();
           if (signedUrl) setImagePreviewUrl(String(signedUrl));
@@ -245,7 +257,12 @@ const AdminPage = () => {
         if (url) setImagePreviewUrl(url);
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
+      const msg =
+        e instanceof DOMException && e.name === "AbortError"
+          ? "Request timed out. Please try again."
+          : e instanceof Error
+            ? e.message
+            : String(e);
       setErrorMsg(msg);
     } finally {
       setUploadingImage(false);
@@ -266,11 +283,15 @@ const AdminPage = () => {
       setErrorMsg(null);
       setUploadingImage(true);
 
+      const uploadUrlController = new AbortController();
+      const uploadUrlTimeout = window.setTimeout(() => uploadUrlController.abort(), REQUEST_TIMEOUT_MS);
       const res = await fetch("/api/blog-upload-url", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
+        signal: uploadUrlController.signal,
       });
+      window.clearTimeout(uploadUrlTimeout);
       if (!res.ok) {
         const t = await res.text();
         throw new Error(t || "Failed to create signed upload URL");
@@ -279,7 +300,11 @@ const AdminPage = () => {
       if (!path || !token) throw new Error("Invalid signed upload response");
 
       const bucketName = typeof bucket === "string" && bucket ? bucket : "blog";
-      const { error: upErr } = await supabase.storage.from(bucketName).uploadToSignedUrl(path, token, file);
+      const uploadPromise = supabase.storage.from(bucketName).uploadToSignedUrl(path, token, file);
+      const uploadTimeoutPromise = new Promise<never>((_, reject) =>
+        window.setTimeout(() => reject(new Error("Upload timed out. Please try again.")), REQUEST_TIMEOUT_MS)
+      );
+      const { error: upErr } = await Promise.race([uploadPromise, uploadTimeoutPromise]);
       if (upErr) throw upErr;
 
       const { data: pub } = await supabase.storage.from(bucketName).getPublicUrl(path);
@@ -291,11 +316,15 @@ const AdminPage = () => {
       // Always try to show a signed preview (best for private buckets).
       setImagePreviewUrl("");
       try {
+        const viewController = new AbortController();
+        const viewTimeout = window.setTimeout(() => viewController.abort(), REQUEST_TIMEOUT_MS);
         const viewRes = await fetch("/api/gallery-signed-view", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ path, bucket: bucketName, expiresIn: 3600 }),
+          signal: viewController.signal,
         });
+        window.clearTimeout(viewTimeout);
         if (viewRes.ok) {
           const { signedUrl } = await viewRes.json();
           if (signedUrl) setImagePreviewUrl(String(signedUrl));
@@ -307,29 +336,47 @@ const AdminPage = () => {
         if (url) setImagePreviewUrl(url);
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
+      const msg =
+        e instanceof DOMException && e.name === "AbortError"
+          ? "Request timed out. Please try again."
+          : e instanceof Error
+            ? e.message
+            : String(e);
       setErrorMsg(msg);
     } finally {
       setUploadingImage(false);
     }
   };
 
-  const loadCounts = useCallback(async () => {
-    if (!isAuthorized) return;
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) return;
-    const entities: Entity[] = ["courses", "events", "team_members", "gallery_items", "blog_posts", "memberships", "contact_messages"];
-    const results = await Promise.all(
-      entities.map(async (e) => {
-        const { count } = await supabase.from(e).select("*", { count: "exact", head: true });
-        return { e, count: typeof count === "number" ? count : null };
-      })
-    );
-    const next: Record<Entity, number | null> = { ...counts };
-    results.forEach(({ e, count }) => {
-      next[e] = count;
-    });
-    setCounts(next);
-  }, [isAuthorized, counts]);
+  const loadCounts = useCallback(
+    async (mode: "all" | "active" = "active") => {
+      if (!isAuthorized) return;
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) return;
+
+      const all: Entity[] = ["courses", "events", "team_members", "gallery_items", "blog_posts", "memberships", "contact_messages"];
+      const entities: Entity[] =
+        mode === "all" ? all : active === "dashboard" ? [] : [active];
+
+      if (!entities.length) return;
+
+      const results = await Promise.all(
+        entities.map(async (e) => {
+          const { count, error } = await supabase.from(e).select("*", { count: "exact", head: true });
+          if (error) return { e, count: null };
+          return { e, count: typeof count === "number" ? count : null };
+        })
+      );
+
+      setCounts((prev) => {
+        const next: Record<Entity, number | null> = { ...prev };
+        results.forEach(({ e, count }) => {
+          next[e] = count;
+        });
+        return next;
+      });
+    },
+    [isAuthorized, active]
+  );
 
   useEffect(() => {
     loadRows();
@@ -338,7 +385,12 @@ const AdminPage = () => {
   }, [loadRows]);
 
   useEffect(() => {
-    loadCounts();
+    // Fetch all counts once after authorization; then only keep active count in sync.
+    loadCounts("all");
+  }, [loadCounts, isAuthorized]);
+
+  useEffect(() => {
+    loadCounts("active");
   }, [loadCounts, active]);
 
   // Auth session & authorization
