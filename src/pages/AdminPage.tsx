@@ -47,6 +47,9 @@ const AdminPage = () => {
 
   const REQUEST_TIMEOUT_MS = 15_000;
 
+  const GALLERY_FILE_INPUT_ID = "admin-gallery-image-file";
+  const BLOG_FILE_INPUT_ID = "admin-blog-image-file";
+
   const slugify = (value: string) => {
     return value
       .toLowerCase()
@@ -219,10 +222,13 @@ const AdminPage = () => {
       // Try to get a public URL for preview if the bucket is public.
       const { data: pub } = await supabase.storage.from(bucket).getPublicUrl(path);
       const url = pub?.publicUrl || "";
-      // Store path if private; use signed preview URL for immediate display
-      setForm({ ...form, image_url: url || path });
-      setImagePreviewUrl(url);
-      if (!url) {
+
+      // Always store the Storage path (works for private buckets).
+      setForm({ ...form, image_url: path });
+
+      // Always try to show a signed preview (best for private buckets).
+      setImagePreviewUrl("");
+      try {
         const viewRes = await fetch("/api/gallery-signed-view", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -230,8 +236,13 @@ const AdminPage = () => {
         });
         if (viewRes.ok) {
           const { signedUrl } = await viewRes.json();
-          if (signedUrl) setImagePreviewUrl(signedUrl);
+          if (signedUrl) setImagePreviewUrl(String(signedUrl));
+          else if (url) setImagePreviewUrl(url);
+        } else if (url) {
+          setImagePreviewUrl(url);
         }
+      } catch {
+        if (url) setImagePreviewUrl(url);
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -273,9 +284,13 @@ const AdminPage = () => {
 
       const { data: pub } = await supabase.storage.from(bucketName).getPublicUrl(path);
       const url = pub?.publicUrl || "";
-      setForm({ ...form, image_url: url || path });
-      setImagePreviewUrl(url);
-      if (!url) {
+
+      // Always store the Storage path (works for private buckets).
+      setForm({ ...form, image_url: path });
+
+      // Always try to show a signed preview (best for private buckets).
+      setImagePreviewUrl("");
+      try {
         const viewRes = await fetch("/api/gallery-signed-view", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -283,8 +298,13 @@ const AdminPage = () => {
         });
         if (viewRes.ok) {
           const { signedUrl } = await viewRes.json();
-          if (signedUrl) setImagePreviewUrl(signedUrl);
+          if (signedUrl) setImagePreviewUrl(String(signedUrl));
+          else if (url) setImagePreviewUrl(url);
+        } else if (url) {
+          setImagePreviewUrl(url);
         }
+      } catch {
+        if (url) setImagePreviewUrl(url);
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -640,12 +660,17 @@ const AdminPage = () => {
                                               <input
                                                 type="file"
                                                 accept="image/*"
+                                                id={GALLERY_FILE_INPUT_ID}
                                                 onChange={(e) => {
                                                   const f = e.target.files?.[0];
                                                   if (f) handleGalleryImageUpload(f);
                                                 }}
                                               />
-                                              <Button type="button" disabled={uploadingImage} onClick={() => {}}>
+                                              <Button
+                                                type="button"
+                                                disabled={uploadingImage}
+                                                onClick={() => document.getElementById(GALLERY_FILE_INPUT_ID)?.click()}
+                                              >
                                                 {uploadingImage ? "Uploading..." : "Upload Image"}
                                               </Button>
                                             </div>
@@ -666,12 +691,17 @@ const AdminPage = () => {
                                               <input
                                                 type="file"
                                                 accept="image/*"
+                                                id={BLOG_FILE_INPUT_ID}
                                                 onChange={(e) => {
                                                   const f = e.target.files?.[0];
                                                   if (f) handleBlogImageUpload(f);
                                                 }}
                                               />
-                                              <Button type="button" disabled={uploadingImage} onClick={() => {}}>
+                                              <Button
+                                                type="button"
+                                                disabled={uploadingImage}
+                                                onClick={() => document.getElementById(BLOG_FILE_INPUT_ID)?.click()}
+                                              >
                                                 {uploadingImage ? "Uploading..." : "Upload Image"}
                                               </Button>
                                             </div>

@@ -6,10 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image, Video } from "lucide-react";
 import { useSupabaseList } from "@/hooks/useSupabaseList";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const GalleryPage = () => {
   const [limit, setLimit] = useState(18);
+  const [signedGalleryUrls, setSignedGalleryUrls] = useState<Record<string, string>>({});
 
   const videos = [
     { id: 1, thumbnail: "https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800", title: "Introduction to Club", duration: "5:30" },
@@ -23,6 +24,55 @@ const GalleryPage = () => {
     image_url?: string;
     caption?: string;
   }>("gallery_items", { orderBy: "id", ascending: false, limit });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const list = gallery ?? [];
+      const paths = Array.from(
+        new Set(
+          list
+            .map((g) => String(g.image_url || "").trim())
+            .filter((v) => v && !/^https?:\/\//i.test(v))
+        )
+      );
+
+      if (!paths.length) {
+        setSignedGalleryUrls({});
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/storage-signed-views", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ bucket: "gallery", paths, expiresIn: 3600 }),
+        });
+        if (!res.ok) return;
+        const j = await res.json();
+        const map =
+          j && typeof j === "object" && j.signedUrls && typeof j.signedUrls === "object"
+            ? (j.signedUrls as Record<string, string>)
+            : {};
+        if (!cancelled) setSignedGalleryUrls(map);
+      } catch {
+        // ignore
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [gallery]);
+
+  const resolveImageUrl = useMemo(() => {
+    return (raw?: string) => {
+      const value = String(raw || "").trim();
+      if (!value) return "";
+      if (/^https?:\/\//i.test(value)) return value;
+      return signedGalleryUrls[value] || "";
+    };
+  }, [signedGalleryUrls]);
 
   return (
     <div className="min-h-screen">
@@ -72,7 +122,7 @@ const GalleryPage = () => {
                       <CardContent className="p-0">
                         <div className="relative overflow-hidden">
                           <img
-                            src={g.image_url || ""}
+                            src={resolveImageUrl(g.image_url)}
                             alt={g.caption || g.title || "Gallery"}
                             loading="lazy"
                             className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"

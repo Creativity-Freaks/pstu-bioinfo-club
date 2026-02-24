@@ -30,16 +30,19 @@ async function uploadMembershipPhotoDirect(file: File, opts?: { expiresIn?: numb
   const { data: pub } = await supabase.storage.from(bucket).getPublicUrl(path);
   const publicUrl = pub?.publicUrl || "";
 
-  let previewUrl = publicUrl;
-  if (!previewUrl && typeof window !== "undefined" && typeof URL !== "undefined") {
-    // Fallback to local preview if bucket is private or public URL not available
+  // getPublicUrl() always returns a URL string, even for private buckets.
+  // For direct uploads (dev fallback), prefer local preview.
+  let previewUrl = "";
+  if (typeof window !== "undefined" && typeof URL !== "undefined") {
     previewUrl = URL.createObjectURL(file);
+  } else {
+    previewUrl = publicUrl;
   }
 
   return {
     bucket,
     path,
-    storedValue: publicUrl || path,
+    storedValue: path,
     previewUrl,
   };
 }
@@ -76,8 +79,10 @@ export async function uploadMembershipPhoto(file: File, opts?: { expiresIn?: num
     const { data: pub } = await supabase.storage.from(bucket).getPublicUrl(path);
     const publicUrl = pub?.publicUrl || "";
 
-    let previewUrl = publicUrl;
-    if (!previewUrl) {
+    // getPublicUrl() may be non-empty even when bucket is private.
+    // Prefer signed preview; fallback to public URL; then local object URL.
+    let previewUrl = "";
+    try {
       const expiresIn = typeof opts?.expiresIn === "number" ? opts.expiresIn : 3600;
       const viewRes = await fetch("/api/gallery-signed-view", {
         method: "POST",
@@ -86,14 +91,20 @@ export async function uploadMembershipPhoto(file: File, opts?: { expiresIn?: num
       });
       if (viewRes.ok) {
         const body = (await viewRes.json()) as { signedUrl?: string };
-        if (body?.signedUrl) previewUrl = body.signedUrl;
+        if (body?.signedUrl) previewUrl = String(body.signedUrl);
       }
+    } catch {
+      // ignore
+    }
+    if (!previewUrl) previewUrl = publicUrl;
+    if (!previewUrl && typeof window !== "undefined" && typeof URL !== "undefined") {
+      previewUrl = URL.createObjectURL(file);
     }
 
     return {
       bucket,
       path,
-      storedValue: publicUrl || path,
+      storedValue: path,
       previewUrl,
     };
   } catch (err) {
