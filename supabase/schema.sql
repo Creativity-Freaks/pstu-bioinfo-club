@@ -43,8 +43,16 @@ create table if not exists public.blog_posts (
    slug       text unique,
    excerpt    text,
    content    text,
+   image_url  text,
+   author     text,
+   category   text,
    created_at timestamp with time zone default now()
 );
+
+-- If the table already exists, add missing columns safely
+alter table public.blog_posts add column if not exists image_url text;
+alter table public.blog_posts add column if not exists author text;
+alter table public.blog_posts add column if not exists category text;
 
 -- Contact messages
 create table if not exists public.contact_messages (

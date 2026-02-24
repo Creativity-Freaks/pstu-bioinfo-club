@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useCallback, useEffect, useState } from "react";
 import type { ElementType } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,13 +45,23 @@ const AdminPage = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>("");
 
+  const slugify = (value: string) => {
+    return value
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .slice(0, 80);
+  };
+
   const columnsByEntity: Record<Entity, string[]> = {
     dashboard: [],
     courses: ["title", "description", "duration", "level", "modules"],
     events: ["title", "description", "date", "location"],
     team_members: ["name", "role", "bio", "avatar_url"],
     gallery_items: ["title", "image_url", "caption"],
-    blog_posts: ["title", "slug", "excerpt", "content"],
+    blog_posts: ["title", "slug", "author", "category", "image_url", "excerpt", "content"],
     memberships: ["name", "email", "student_id", "department", "year", "phone", "bio", "skills", "photo_url"],
     contact_messages: ["name", "email", "student_id", "message"],
   };
@@ -119,6 +130,59 @@ const AdminPage = () => {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ path, bucket, expiresIn: 3600 }),
+        });
+        if (viewRes.ok) {
+          const { signedUrl } = await viewRes.json();
+          if (signedUrl) setImagePreviewUrl(signedUrl);
+        }
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setErrorMsg(msg);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleBlogImageUpload = async (file: File) => {
+    if (!file) return;
+    if (!isAuthorized) {
+      setErrorMsg("Admin access is restricted. Please sign in.");
+      return;
+    }
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      setErrorMsg("Supabase environment variables are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+      return;
+    }
+    try {
+      setErrorMsg(null);
+      setUploadingImage(true);
+
+      const res = await fetch("/api/blog-upload-url", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(t || "Failed to create signed upload URL");
+      }
+      const { path, token, bucket } = await res.json();
+      if (!path || !token) throw new Error("Invalid signed upload response");
+
+      const bucketName = typeof bucket === "string" && bucket ? bucket : "blog";
+      const { error: upErr } = await supabase.storage.from(bucketName).uploadToSignedUrl(path, token, file);
+      if (upErr) throw upErr;
+
+      const { data: pub } = await supabase.storage.from(bucketName).getPublicUrl(path);
+      const url = pub?.publicUrl || "";
+      setForm({ ...form, image_url: url || path });
+      setImagePreviewUrl(url);
+      if (!url) {
+        const viewRes = await fetch("/api/gallery-signed-view", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ path, bucket: bucketName, expiresIn: 3600 }),
         });
         if (viewRes.ok) {
           const { signedUrl } = await viewRes.json();
@@ -415,6 +479,52 @@ const AdminPage = () => {
                                               </div>
                                             )}
                                           </div>
+                                        ) : active === "blog_posts" && c === "image_url" ? (
+                                          <div className="space-y-2">
+                                            <Input
+                                              placeholder="https://..."
+                                              value={String(form[c] ?? "")}
+                                              onChange={(e) => setForm({ ...form, [c]: e.target.value })}
+                                            />
+                                            <div className="flex items-center gap-2">
+                                              <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => {
+                                                  const f = e.target.files?.[0];
+                                                  if (f) handleBlogImageUpload(f);
+                                                }}
+                                              />
+                                              <Button type="button" disabled={uploadingImage} onClick={() => {}}>
+                                                {uploadingImage ? "Uploading..." : "Upload Image"}
+                                              </Button>
+                                            </div>
+                                            {(form.image_url || imagePreviewUrl) && (
+                                              <div className="mt-2">
+                                                <img src={String(imagePreviewUrl || form.image_url)} alt="Preview" className="h-24 rounded object-cover border" />
+                                              </div>
+                                            )}
+                                          </div>
+                                        ) : active === "blog_posts" && (c === "content" || c === "excerpt") ? (
+                                          <Textarea
+                                            value={String(form[c] ?? "")}
+                                            onChange={(e) => setForm({ ...form, [c]: e.target.value })}
+                                            className={c === "content" ? "min-h-[220px]" : "min-h-[120px]"}
+                                            placeholder={c === "content" ? "Write the full post content..." : "Short summary for previews..."}
+                                          />
+                                        ) : active === "blog_posts" && c === "title" ? (
+                                          <Input
+                                            value={String(form[c] ?? "")}
+                                            onChange={(e) => {
+                                              const nextTitle = e.target.value;
+                                              const next: Row = { ...form, [c]: nextTitle };
+                                              const currentSlug = String(form.slug ?? "");
+                                              if (!currentSlug) {
+                                                next.slug = slugify(nextTitle);
+                                              }
+                                              setForm(next);
+                                            }}
+                                          />
                                         ) : (
                                           <Input
                                             value={String(form[c] ?? "")}

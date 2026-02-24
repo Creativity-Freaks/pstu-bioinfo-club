@@ -9,6 +9,7 @@ import AboutPage from "./pages/AboutPage";
 import EventsPage from "./pages/EventsPage";
 import TeamPage from "./pages/TeamPage";
 import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
 import GalleryPage from "./pages/GalleryPage";
 import WorkshopsPage from "./pages/WorkshopsPage";
 import MentorshipPage from "./pages/MentorshipPage";
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/events" element={<EventsPage />} />
           <Route path="/team" element={<TeamPage />} />
           <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/workshops" element={<WorkshopsPage />} />
           <Route path="/mentorship" element={<MentorshipPage />} />

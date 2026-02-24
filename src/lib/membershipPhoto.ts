@@ -14,42 +14,26 @@ export function validateImageFile(file: File, opts?: { maxBytes?: number }) {
   if (file.size > maxBytes) throw new Error(`Image is too large (max ${Math.round(maxBytes / 1024 / 1024)}MB)`);
 }
 
-export async function uploadMembershipPhoto(file: File, opts?: { expiresIn?: number }):
-  Promise<MembershipPhotoUploadResult> {
-  validateImageFile(file);
+async function uploadMembershipPhotoDirect(file: File, opts?: { expiresIn?: number }): Promise<MembershipPhotoUploadResult> {
+  const bucket = "memberships";
+  const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+  const safeExt = ext.replace(/[^a-z0-9]/g, "").slice(0, 10) || "bin";
+  const path = `memberships/${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
 
-  const res = await fetch("/api/membership-photo-upload-url", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
+  const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
+    cacheControl: "3600",
+    upsert: true,
+    contentType: file.type || "application/octet-stream",
   });
-
-  if (!res.ok) {
-    const t = await res.text().catch(() => "");
-    throw new Error(t || `Failed to create upload URL (${res.status})`);
-  }
-
-  const { bucket, path, token } = (await res.json()) as { bucket?: string; path?: string; token?: string };
-  if (!bucket || !path || !token) throw new Error("Invalid signed upload response");
-
-  const { error: upErr } = await supabase.storage.from(bucket).uploadToSignedUrl(path, token, file);
   if (upErr) throw upErr;
 
   const { data: pub } = await supabase.storage.from(bucket).getPublicUrl(path);
   const publicUrl = pub?.publicUrl || "";
 
   let previewUrl = publicUrl;
-  if (!previewUrl) {
-    const expiresIn = typeof opts?.expiresIn === "number" ? opts.expiresIn : 3600;
-    const viewRes = await fetch("/api/gallery-signed-view", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ path, bucket, expiresIn }),
-    });
-    if (viewRes.ok) {
-      const body = (await viewRes.json()) as { signedUrl?: string };
-      if (body?.signedUrl) previewUrl = body.signedUrl;
-    }
+  if (!previewUrl && typeof window !== "undefined" && typeof URL !== "undefined") {
+    // Fallback to local preview if bucket is private or public URL not available
+    previewUrl = URL.createObjectURL(file);
   }
 
   return {
@@ -58,4 +42,65 @@ export async function uploadMembershipPhoto(file: File, opts?: { expiresIn?: num
     storedValue: publicUrl || path,
     previewUrl,
   };
+}
+
+export async function uploadMembershipPhoto(file: File, opts?: { expiresIn?: number }): Promise<MembershipPhotoUploadResult> {
+  validateImageFile(file);
+
+  const isLocalhost =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
+  try {
+    const res = await fetch("/api/membership-photo-upload-url", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
+    });
+
+    if (!res.ok) {
+      if (isLocalhost && res.status === 404) {
+        // Dev fallback: API route not available in plain Vite dev
+        return await uploadMembershipPhotoDirect(file, opts);
+      }
+      const t = await res.text().catch(() => "");
+      throw new Error(t || `Failed to create upload URL (${res.status})`);
+    }
+
+    const { bucket, path, token } = (await res.json()) as { bucket?: string; path?: string; token?: string };
+    if (!bucket || !path || !token) throw new Error("Invalid signed upload response");
+
+    const { error: upErr } = await supabase.storage.from(bucket).uploadToSignedUrl(path, token, file);
+    if (upErr) throw upErr;
+
+    const { data: pub } = await supabase.storage.from(bucket).getPublicUrl(path);
+    const publicUrl = pub?.publicUrl || "";
+
+    let previewUrl = publicUrl;
+    if (!previewUrl) {
+      const expiresIn = typeof opts?.expiresIn === "number" ? opts.expiresIn : 3600;
+      const viewRes = await fetch("/api/gallery-signed-view", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ path, bucket, expiresIn }),
+      });
+      if (viewRes.ok) {
+        const body = (await viewRes.json()) as { signedUrl?: string };
+        if (body?.signedUrl) previewUrl = body.signedUrl;
+      }
+    }
+
+    return {
+      bucket,
+      path,
+      storedValue: publicUrl || path,
+      previewUrl,
+    };
+  } catch (err) {
+    if (isLocalhost) {
+      // Network or other error in dev: try direct upload as a fallback
+      return await uploadMembershipPhotoDirect(file, opts);
+    }
+    throw err;
+  }
 }

@@ -6,112 +6,156 @@ import { Button } from "@/components/ui/button";
 import { Calendar, User, ArrowRight, BookOpen } from "lucide-react";
 import FloatingActions from "@/components/FloatingActions";
 import { useSupabaseList } from "@/hooks/useSupabaseList";
+import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+
+type BlogPost = {
+  id: number;
+  title: string;
+  slug?: string | null;
+  excerpt?: string | null;
+  content?: string | null;
+  image_url?: string | null;
+  author?: string | null;
+  category?: string | null;
+  created_at?: string | null;
+};
+
+function formatDate(value?: string | null) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+function getPostSlug(p: Pick<BlogPost, "slug" | "id">) {
+  const raw = String(p.slug || "").trim();
+  return raw || `post-${p.id}`;
+}
+
+function autoExcerpt(content?: string | null, maxLen = 180) {
+  const text = String(content || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) return "";
+  if (text.length <= maxLen) return text;
+  return text.slice(0, maxLen).replace(/\s+\S*$/, "").trim() + "…";
+}
+
+function useResolvedBlogImageUrl(imageUrl?: string | null) {
+  const [resolved, setResolved] = useState<string>("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const raw = String(imageUrl || "").trim();
+      if (!raw) {
+        setResolved("");
+        return;
+      }
+      if (/^https?:\/\//i.test(raw)) {
+        setResolved(raw);
+        return;
+      }
+      // private bucket path → resolve signed view URL
+      try {
+        const viewRes = await fetch("/api/gallery-signed-view", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ path: raw, bucket: "blog", expiresIn: 3600 }),
+        });
+        if (!viewRes.ok) return;
+        const { signedUrl } = await viewRes.json();
+        if (!cancelled && signedUrl) setResolved(String(signedUrl));
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [imageUrl]);
+
+  return resolved;
+}
+
+function FeaturedImage({ imageUrl, title }: { imageUrl?: string | null; title: string }) {
+  const resolved = useResolvedBlogImageUrl(imageUrl);
+  if (!resolved) return <span className="text-9xl animate-float">📚</span>;
+  return (
+    <img
+      src={resolved}
+      alt={title}
+      className="w-full h-full max-h-[320px] object-cover rounded-md border border-white/10"
+    />
+  );
+}
+
+function CardImage({ imageUrl, title }: { imageUrl?: string | null; title: string }) {
+  const resolved = useResolvedBlogImageUrl(imageUrl);
+  if (!resolved) {
+    return <div className="h-40 w-full rounded-md border bg-background flex items-center justify-center text-5xl">📄</div>;
+  }
+  return <img src={resolved} alt={title} className="h-40 w-full object-cover rounded-md border" />;
+}
 
 const BlogPage = () => {
-  const blogPosts = [
-    {
-      title: "Understanding CRISPR-Cas9: A Bioinformatics Perspective",
-      excerpt: "Explore how computational tools are revolutionizing gene editing research and how bioinformatics plays a crucial role in CRISPR applications.",
-      author: "Dr. Rahman",
-      date: "March 1, 2025",
-      category: "Genomics",
-      readTime: "8 min read",
-      image: "🧬"
-    },
-    {
-      title: "Machine Learning in Drug Discovery: Current Trends",
-      excerpt: "Dive into how AI and machine learning algorithms are accelerating pharmaceutical research and reducing drug development costs.",
-      author: "Student President",
-      date: "February 25, 2025",
-      category: "AI in Biology",
-      readTime: "10 min read",
-      image: "🤖"
-    },
-    {
-      title: "Introduction to RNA-Seq Analysis",
-      excerpt: "A comprehensive guide for beginners on transcriptome analysis, from raw data processing to differential expression analysis.",
-      author: "Workshop Coordinator",
-      date: "February 20, 2025",
-      category: "Tutorial",
-      readTime: "12 min read",
-      image: "📊"
-    },
-    {
-      title: "Career Paths in Bioinformatics: Bangladesh Context",
-      excerpt: "Exploring opportunities in bioinformatics within Bangladesh and how local students can prepare for careers in this field.",
-      author: "Vice President",
-      date: "February 15, 2025",
-      category: "Career",
-      readTime: "7 min read",
-      image: "🎓"
-    },
-    {
-      title: "AlphaFold 2: Revolution in Protein Structure Prediction",
-      excerpt: "Understanding how DeepMind's AlphaFold is changing structural biology and what it means for bioinformatics research.",
-      author: "General Secretary",
-      date: "February 10, 2025",
-      category: "Structural Biology",
-      readTime: "9 min read",
-      image: "🔬"
-    },
-    {
-      title: "Best Python Libraries for Bioinformatics",
-      excerpt: "A curated list of essential Python libraries every bioinformatics student should know, from BioPython to scikit-learn.",
-      author: "Technical Lead",
-      date: "February 5, 2025",
-      category: "Programming",
-      readTime: "6 min read",
-      image: "🐍"
-    },
-    {
-      title: "Metagenomics: Studying Microbial Communities",
-      excerpt: "Learn about the computational approaches used to study complex microbial ecosystems and microbiome analysis.",
-      author: "Treasurer",
-      date: "January 30, 2025",
-      category: "Metagenomics",
-      readTime: "11 min read",
-      image: "🦠"
-    },
-    {
-      title: "Getting Started with Galaxy Platform",
-      excerpt: "Step-by-step guide to using Galaxy for bioinformatics workflows without extensive programming knowledge.",
-      author: "Workshop Coordinator",
-      date: "January 25, 2025",
-      category: "Tutorial",
-      readTime: "8 min read",
-      image: "🌌"
-    },
-    {
-      title: "Bioinformatics Tools for COVID-19 Research",
-      excerpt: "How computational biology tools helped researchers understand and combat the COVID-19 pandemic.",
-      author: "Dr. Technical Advisor",
-      date: "January 20, 2025",
-      category: "Research",
-      readTime: "10 min read",
-      image: "🦠"
-    }
-  ];
+  const [selectedCategory, setSelectedCategory] = useState<string>("All Posts");
 
-  const categories = [
-    "All Posts",
-    "Genomics",
-    "AI in Biology",
-    "Tutorial",
-    "Career",
-    "Structural Biology",
-    "Programming",
-    "Metagenomics",
-    "Research"
-  ];
+  const { data: dbPosts, isLoading: postsLoading, error: postsError } = useSupabaseList<BlogPost>("blog_posts", {
+    orderBy: "created_at",
+    ascending: false,
+    limit: 50,
+  });
 
-  const { data: dbPosts, isLoading: postsLoading, error: postsError } = useSupabaseList<{
-    id: number;
-    title: string;
-    slug?: string;
-    excerpt?: string;
-    content?: string;
-    created_at?: string;
-  }>("blog_posts", { orderBy: "id", ascending: false, limit: 9 });
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    (dbPosts ?? []).forEach((p) => {
+      const c = String(p.category || "").trim();
+      if (c) set.add(c);
+    });
+    return ["All Posts", ...Array.from(set)];
+  }, [dbPosts]);
+
+  const filteredPosts = useMemo(() => {
+    const list = dbPosts ?? [];
+    if (selectedCategory === "All Posts") return list;
+    return list.filter((p) => String(p.category || "").trim() === selectedCategory);
+  }, [dbPosts, selectedCategory]);
+
+  const featured = filteredPosts.length ? filteredPosts[0] : null;
+
+  const stats = useMemo(() => {
+    const list = dbPosts ?? [];
+    const postCount = list.length;
+    const authorSet = new Set<string>();
+    const categorySet = new Set<string>();
+    let latest: string | null = null;
+
+    list.forEach((p) => {
+      const a = String(p.author || "").trim();
+      if (a) authorSet.add(a);
+      const c = String(p.category || "").trim();
+      if (c) categorySet.add(c);
+      if (p.created_at) {
+        const t = new Date(p.created_at).getTime();
+        if (!Number.isNaN(t)) {
+          if (!latest) latest = p.created_at;
+          else {
+            const lt = new Date(latest).getTime();
+            if (!Number.isNaN(lt) && t > lt) latest = p.created_at;
+          }
+        }
+      }
+    });
+
+    return {
+      postCount,
+      authorCount: authorSet.size,
+      categoryCount: categorySet.size,
+      latest,
+    };
+  }, [dbPosts]);
 
   return (
     <div className="min-h-screen">
@@ -147,18 +191,18 @@ const BlogPage = () => {
 
             <div className="flex flex-wrap items-center justify-center gap-8">
               <div className="text-center">
-                <div className="text-4xl font-bold text-primary mb-1">50+</div>
+                <div className="text-4xl font-bold text-primary mb-1">{postsLoading ? "–" : stats.postCount}</div>
                 <div className="text-sm text-muted-foreground">Articles Published</div>
               </div>
               <div className="w-px h-12 bg-border" />
               <div className="text-center">
-                <div className="text-4xl font-bold text-primary mb-1">10K+</div>
-                <div className="text-sm text-muted-foreground">Monthly Readers</div>
+                <div className="text-4xl font-bold text-primary mb-1">{postsLoading ? "–" : stats.authorCount}</div>
+                <div className="text-sm text-muted-foreground">Contributors</div>
               </div>
               <div className="w-px h-12 bg-border" />
               <div className="text-center">
-                <div className="text-4xl font-bold text-primary mb-1">15+</div>
-                <div className="text-sm text-muted-foreground">Contributors</div>
+                <div className="text-4xl font-bold text-primary mb-1">{postsLoading ? "–" : stats.categoryCount}</div>
+                <div className="text-sm text-muted-foreground">Categories</div>
               </div>
             </div>
           </div>
@@ -172,41 +216,14 @@ const BlogPage = () => {
             {categories.map((category, index) => (
               <Button
                 key={index}
-                variant={category === "All Posts" ? "default" : "outline"}
+                variant={category === selectedCategory ? "default" : "outline"}
                 className="rounded-full"
+                onClick={() => setSelectedCategory(category)}
               >
                 {category}
               </Button>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* From Database */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold mb-2">Latest from Admin</h2>
-            <p className="text-muted-foreground">Posts managed via Admin Panel</p>
-          </div>
-          {postsError && <p className="text-red-500 mb-6">{String(postsError.message || postsError)}</p>}
-          {postsLoading ? (
-            <p className="text-muted-foreground">Loading posts...</p>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {(dbPosts ?? []).map((p, idx) => (
-                <Card key={p.id} className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-2 border-t-4 border-t-primary/50">
-                  <CardHeader>
-                    <CardTitle className="text-xl">{p.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground line-clamp-4">{p.excerpt || ""}</p>
-                    <Button variant="outline" className="w-full mt-4">Read</Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 
@@ -218,35 +235,56 @@ const BlogPage = () => {
             <p className="text-muted-foreground">Our latest and most popular article</p>
           </div>
 
-          <Card className="overflow-hidden hover:shadow-elegant border-t-4 border-t-primary animate-fade-in transition-all duration-500 group">
-            <div className="grid md:grid-cols-2">
-              <div className="bg-gradient-primary flex items-center justify-center p-12 group-hover:scale-105 transition-transform duration-500">
-                <span className="text-9xl animate-float">{blogPosts[0].image}</span>
-              </div>
-              <CardContent className="p-8 flex flex-col justify-center">
-                <div className="flex items-center gap-3 mb-4">
-                  <Badge>{blogPosts[0].category}</Badge>
-                  <span className="text-sm text-muted-foreground">{blogPosts[0].readTime}</span>
-                </div>
-                <h3 className="text-3xl font-bold mb-4">{blogPosts[0].title}</h3>
-                <p className="text-muted-foreground mb-6">{blogPosts[0].excerpt}</p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    {blogPosts[0].author}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    {blogPosts[0].date}
-                  </div>
-                </div>
-                <Button className="w-fit bg-gradient-primary hover:scale-110 transition-all duration-300 shadow-elegant hover:shadow-glow group">
-                  Read Article
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-2 transition-transform" />
-                </Button>
+          {postsError && (
+            <p className="text-red-500 mb-6">{postsError instanceof Error ? postsError.message : String(postsError)}</p>
+          )}
+          {postsLoading ? (
+            <p className="text-muted-foreground">Loading posts...</p>
+          ) : !featured ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>No posts yet</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Create blog posts from the Admin Panel and they’ll show up here.</p>
               </CardContent>
-            </div>
-          </Card>
+            </Card>
+          ) : (
+            <Card className="overflow-hidden hover:shadow-elegant border-t-4 border-t-primary animate-fade-in transition-all duration-500 group">
+              <div className="grid md:grid-cols-2">
+                <div className="bg-gradient-primary flex items-center justify-center p-12 group-hover:scale-105 transition-transform duration-500">
+                  <FeaturedImage imageUrl={featured.image_url} title={featured.title} />
+                </div>
+                <CardContent className="p-8 flex flex-col justify-center">
+                  <div className="flex items-center gap-3 mb-4">
+                    {featured.category ? <Badge>{featured.category}</Badge> : <Badge variant="outline">Blog</Badge>}
+                  </div>
+                  <h3 className="text-3xl font-bold mb-4">{featured.title}</h3>
+                  <p className="text-muted-foreground mb-6">{featured.excerpt || autoExcerpt(featured.content)}</p>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
+                    {featured.author && (
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        {featured.author}
+                      </div>
+                    )}
+                    {featured.created_at && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        {formatDate(featured.created_at)}
+                      </div>
+                    )}
+                  </div>
+                  <Button asChild className="w-fit bg-gradient-primary hover:scale-110 transition-all duration-300 shadow-elegant hover:shadow-glow group">
+                    <Link to={`/blog/${getPostSlug(featured)}`}>
+                      Read Article
+                      <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-2 transition-transform" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </div>
+            </Card>
+          )}
         </div>
       </section>
 
@@ -258,67 +296,61 @@ const BlogPage = () => {
             <p className="text-muted-foreground">Browse through our collection of articles</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.slice(1).map((post, index) => (
-              <Card
-                key={index}
-                className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 animate-fade-in group border-t-4 border-t-primary/50 hover:border-t-primary cursor-pointer"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <CardHeader>
-                  <div className="text-6xl mb-4 text-center">{post.image}</div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <Badge variant="outline">{post.category}</Badge>
-                    <span className="text-sm text-muted-foreground">{post.readTime}</span>
-                  </div>
-                  <CardTitle className="text-xl line-clamp-2">{post.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4 line-clamp-3">{post.excerpt}</p>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                    <div className="flex items-center gap-1">
-                      <User className="w-4 h-4" />
-                      <span className="line-clamp-1">{post.author}</span>
+          {postsLoading ? (
+            <p className="text-muted-foreground">Loading posts...</p>
+          ) : filteredPosts.length === 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>No posts found</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Try a different category, or create a post from Admin.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredPosts.map((post, index) => (
+                <Card
+                  key={post.id}
+                  className="hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 animate-fade-in group border-t-4 border-t-primary/50 hover:border-t-primary"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <CardHeader>
+                    <div className="mb-4">
+                      <CardImage imageUrl={post.image_url} title={post.title} />
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {post.date}
+                    <div className="flex items-center gap-3 mb-3">
+                      {post.category ? <Badge variant="outline">{post.category}</Badge> : <Badge variant="outline">Blog</Badge>}
                     </div>
-                  </div>
-                  <Button variant="outline" className="w-full group">
-                    Read More
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Button size="lg" variant="outline">
-              Load More Posts
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter Signup */}
-      <section className="py-20 bg-gradient-card">
-        <div className="container mx-auto px-4 text-center">
-          <BookOpen className="w-16 h-16 mx-auto mb-6 text-primary" />
-          <h2 className="text-4xl font-bold mb-4">Stay Updated</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Subscribe to our newsletter to get the latest blog posts, event updates, 
-            and bioinformatics news delivered to your inbox.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg border bg-background"
-            />
-            <Button className="bg-gradient-primary">Subscribe</Button>
-          </div>
+                    <CardTitle className="text-xl line-clamp-2">{post.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4 line-clamp-3">{post.excerpt || ""}</p>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                      {post.author && (
+                        <div className="flex items-center gap-1">
+                          <User className="w-4 h-4" />
+                          <span className="line-clamp-1">{post.author}</span>
+                        </div>
+                      )}
+                      {post.created_at && (
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {formatDate(post.created_at)}
+                        </div>
+                      )}
+                    </div>
+                    <Button asChild variant="outline" className="w-full group">
+                      <Link to={`/blog/${getPostSlug(post)}`}>
+                        Read More
+                        <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
