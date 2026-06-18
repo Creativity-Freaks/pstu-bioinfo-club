@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, ArrowRight, BookOpen } from "lucide-react";
+import { Calendar, User, ArrowRight, BookOpen, Dna, FlaskConical, Lightbulb } from "lucide-react";
 import FloatingActions from "@/components/FloatingActions";
 import { useSupabaseList } from "@/hooks/useSupabaseList";
 import { Link } from "react-router-dom";
@@ -51,7 +51,7 @@ function resolveImageUrl(raw: string | null | undefined, signedMap: Record<strin
 
 function FeaturedImage({ imageUrl, title, signedMap }: { imageUrl?: string | null; title: string; signedMap: Record<string, string> }) {
   const resolved = resolveImageUrl(imageUrl, signedMap);
-  if (!resolved) return <span className="text-9xl animate-float">📚</span>;
+  if (!resolved) return <BookOpen className="w-24 h-24 text-primary/30 animate-float" />;
   return (
     <img src={resolved} alt={title} className="w-full h-full max-h-[320px] object-cover rounded-md border border-white/10" />
   );
@@ -61,7 +61,9 @@ function CardImage({ imageUrl, title, signedMap }: { imageUrl?: string | null; t
   const resolved = resolveImageUrl(imageUrl, signedMap);
   if (!resolved) {
     return (
-      <div className="h-40 w-full rounded-md border bg-background flex items-center justify-center text-5xl">📄</div>
+      <div className="h-40 w-full rounded-md border bg-background flex items-center justify-center">
+        <BookOpen className="w-12 h-12 text-muted-foreground/30" />
+      </div>
     );
   }
   return <img src={resolved} alt={title} className="h-40 w-full object-cover rounded-md border" />;
@@ -168,11 +170,11 @@ const BlogPage = () => {
       <FloatingActions />
       
       <section className="relative pt-32 pb-24 overflow-hidden bg-gradient-to-b from-muted/50 to-background">
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-32 left-10 text-8xl animate-float">📚</div>
-          <div className="absolute top-48 right-20 text-6xl animate-float" style={{ animationDelay: "1s" }}>🧬</div>
-          <div className="absolute bottom-20 left-1/4 text-7xl animate-float" style={{ animationDelay: "2s" }}>💡</div>
-          <div className="absolute top-1/3 right-1/4 text-5xl animate-float" style={{ animationDelay: "3s" }}>🔬</div>
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <BookOpen className="absolute top-32 left-10 w-16 h-16 text-primary animate-float" />
+          <Dna className="absolute top-48 right-20 w-12 h-12 text-accent animate-float" style={{ animationDelay: "1s" }} />
+          <Lightbulb className="absolute bottom-20 left-1/4 w-14 h-14 text-primary animate-float" style={{ animationDelay: "2s" }} />
+          <FlaskConical className="absolute top-1/3 right-1/4 w-10 h-10 text-accent animate-float" style={{ animationDelay: "3s" }} />
         </div>
         
         <div className="container mx-auto px-4 relative z-10">

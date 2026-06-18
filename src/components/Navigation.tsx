@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Dna } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import siteLogo from "@/assets/logo.png";
-import { Button } from "@/components/ui/button";
-import MembershipForm from "@/components/MembershipForm";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMembershipFormOpen, setIsMembershipFormOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -127,8 +124,6 @@ const Navigation = () => {
         )}
       </div>
 
-      {/* Membership dialog retained but not used for navbar button anymore */}
-      <MembershipForm open={isMembershipFormOpen} onOpenChange={setIsMembershipFormOpen} />
     </nav>
   );
 };
