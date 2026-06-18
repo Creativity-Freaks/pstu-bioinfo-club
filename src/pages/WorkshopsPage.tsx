@@ -67,7 +67,7 @@ const WorkshopsPage = () => {
       <Navigation />
       <FloatingActions />
       
-      <section className="py-20 bg-gradient-subtle">
+      <section className="pt-32 pb-20 bg-gradient-subtle">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-primary">
