@@ -26,7 +26,14 @@ const AdminNavbar = () => {
       setSessionEmail(session?.user?.email ?? null);
       setAvatarUrl((session?.user?.user_metadata?.avatar_url as string | undefined) ?? null);
     });
-    return () => listener.subscription.unsubscribe();
+    const refreshProfile = () => {
+      void supabase.auth.getUser().then(({ data }) => setAvatarUrl((data.user?.user_metadata?.avatar_url as string | undefined) ?? null));
+    };
+    window.addEventListener("admin:profile-updated", refreshProfile);
+    return () => {
+      listener.subscription.unsubscribe();
+      window.removeEventListener("admin:profile-updated", refreshProfile);
+    };
   }, []);
 
   const handleSignOut = async () => {

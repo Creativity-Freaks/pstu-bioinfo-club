@@ -1,5 +1,6 @@
 import Navigation from "@/components/Navigation";
 import FloatingActions from "@/components/FloatingActions";
+import Footer from "@/components/Footer";
 // AdminNavbar is rendered at the app root in admin/main.tsx
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -9,9 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ElementType } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, BookOpen, CalendarDays, CheckCircle2, Images, FileText, IdCard, LayoutDashboard, LockKeyhole, Mail, ShieldCheck, Users } from "lucide-react";
+import { ArrowRight, BookOpen, CalendarDays, CheckCircle2, Images, FileText, IdCard, LayoutDashboard, LockKeyhole, Mail, ShieldCheck, Users, UserCog } from "lucide-react";
+import { AdminProfileDialog, AdminUsersPanel } from "@/admin/AdminManagement";
 
-type Entity = "dashboard" | "courses" | "events" | "team_members" | "gallery_items" | "blog_posts" | "memberships" | "contact_messages";
+type Entity = "dashboard" | "courses" | "events" | "team_members" | "gallery_items" | "blog_posts" | "memberships" | "contact_messages" | "users";
 
 type Row = { id?: number } & Record<string, unknown>;
 
@@ -38,14 +40,22 @@ const AdminPage = () => {
     blog_posts: null,
     memberships: null,
     contact_messages: null,
+    users: null,
   });
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>("");
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const REQUEST_TIMEOUT_MS = 15_000;
+
+  useEffect(() => {
+    const openProfile = () => setProfileOpen(true);
+    window.addEventListener("admin:edit-profile", openProfile);
+    return () => window.removeEventListener("admin:edit-profile", openProfile);
+  }, []);
 
   const GALLERY_FILE_INPUT_ID = "admin-gallery-image-file";
   const BLOG_FILE_INPUT_ID = "admin-blog-image-file";
@@ -224,8 +234,8 @@ const AdminPage = () => {
     }
 
     // 'dashboard' is a UI-only section, not a database table
-    if (active === "dashboard") {
-      setErrorMsg(null);
+  if (active === "dashboard" || active === "users") {
+    setErrorMsg(null);
       setRows([]);
       return;
     }
@@ -584,6 +594,7 @@ const AdminPage = () => {
                             { key: "blog_posts", label: "Blog", icon: FileText },
                             { key: "memberships", label: "Memberships", icon: IdCard },
                             { key: "contact_messages", label: "Contact Messages", icon: Mail },
+  { key: "users", label: "Users & roles", icon: UserCog },
                           ].map((item) => {
                             const Icon = item.icon as ElementType;
                             const activeItem = active === item.key;
@@ -617,6 +628,7 @@ const AdminPage = () => {
 
                     {/* Main */}
                     <main className="w-full min-w-0">
+                      {active === "users" ? <AdminUsersPanel /> : <>
                       <div className="mb-6 flex items-end justify-between border-b border-white/[0.08] pb-5">
                         <div><p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">Control center</p><h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">Content management</h2></div>
                         <span className="hidden text-xs text-slate-500 sm:block">Live Supabase workspace</span>
@@ -894,6 +906,7 @@ const AdminPage = () => {
                               </Card>
                             </div>
                           </TabsContent>
+                      </>}
                     </main>
                   </div>
                 </Tabs>
@@ -1050,6 +1063,7 @@ const AdminPage = () => {
       </section>
 
       {!isAdminApp && <Footer />}
+      {isAdminApp && <AdminProfileDialog open={profileOpen} onOpenChange={setProfileOpen} />}
     </div>
   );
 };
