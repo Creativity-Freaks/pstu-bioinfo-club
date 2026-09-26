@@ -588,7 +588,7 @@ const AdminPage = () => {
                 </div>
               ) : (
                 <Tabs value={active} onValueChange={(v) => setActive(v as Entity)}>
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                  <div className="min-h-[calc(100vh-9rem)]">
                     {/* Sidebar */}
                     <aside className="fixed bottom-0 left-0 top-16 z-40 hidden w-64 border-r border-white/[0.07] bg-[#0b0d12] lg:block">
                       <div className="flex h-full flex-col px-4 py-6">
@@ -635,7 +635,7 @@ const AdminPage = () => {
                     </aside>
 
                     {/* Main */}
-                    <div className="w-full lg:col-span-10 lg:col-start-3">
+                    <main className="w-full min-w-0">
                       <div className="mb-6 flex items-end justify-between border-b border-white/[0.08] pb-5">
                         <div><p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">Control center</p><h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">Content management</h2></div>
                         <span className="hidden text-xs text-slate-500 sm:block">Live Supabase workspace</span>
@@ -913,7 +913,7 @@ const AdminPage = () => {
                               </Card>
                             </div>
                           </TabsContent>
-                    </div>
+                    </main>
                   </div>
                 </Tabs>
               )}
