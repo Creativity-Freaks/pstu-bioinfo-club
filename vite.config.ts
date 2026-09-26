@@ -5,29 +5,38 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
+  const usable = (value: string | undefined) => {
+    const trimmed = value?.trim() || "";
+    return trimmed && !trimmed.startsWith("process.env.") ? trimmed : "";
+  };
+  const supabaseUrl =
+    usable(process.env.VITE_SUPABASE_URL) ||
+    usable(process.env.SUPABASE_URL) ||
+    usable(process.env.SUPABASE_URL_2) ||
+    usable(process.env.SUPABASE_URL_3) ||
+    usable(env.VITE_SUPABASE_URL) ||
+    usable(env.SUPABASE_URL) ||
+    usable(env.SUPABASE_URL_2) ||
+    usable(env.SUPABASE_URL_3) ||
+    "";
+  const supabaseKey =
+    usable(process.env.VITE_SUPABASE_ANON_KEY) ||
+    usable(process.env.VITE_SUPABASE_PUBLISHABLE_KEY) ||
+    usable(process.env.SUPABASE_PUBLISHABLE_KEY) ||
+    usable(process.env.SUPABASE_PUBLISHABLE_KEY_2) ||
+    usable(process.env.SUPABASE_PUBLISHABLE_KEY_3) ||
+    usable(env.VITE_SUPABASE_ANON_KEY) ||
+    usable(env.VITE_SUPABASE_PUBLISHABLE_KEY) ||
+    usable(env.SUPABASE_PUBLISHABLE_KEY) ||
+    usable(env.SUPABASE_PUBLISHABLE_KEY_2) ||
+    usable(env.SUPABASE_PUBLISHABLE_KEY_3) ||
+    "";
 
   return {
   define: {
-    "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(
-      env.VITE_SUPABASE_URL ||
-        env.SUPABASE_URL_4 ||
-        env.SUPABASE_URL ||
-        process.env.VITE_SUPABASE_URL ||
-        process.env.SUPABASE_URL_4 ||
-        process.env.SUPABASE_URL ||
-        "",
-    ),
-    "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(
-      env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-        env.VITE_SUPABASE_ANON_KEY ||
-        env.SUPABASE_PUBLISHABLE_KEY_3 ||
-        env.SUPABASE_PUBLISHABLE_KEY ||
-        process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-        process.env.VITE_SUPABASE_ANON_KEY ||
-        process.env.SUPABASE_PUBLISHABLE_KEY_3 ||
-        process.env.SUPABASE_PUBLISHABLE_KEY ||
-        "",
-    ),
+    "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseUrl),
+    "import.meta.env.VITE_SUPABASE_ANON_KEY": JSON.stringify(supabaseKey),
+    "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabaseKey),
   },
   server: {
     host: "::",
