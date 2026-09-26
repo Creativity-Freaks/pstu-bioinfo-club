@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Phone } from "lucide-react";
-import advisor1 from "@/assets/advisor/advisor1.jpeg";
-import advisor2 from "@/assets/advisor/advisor2.jpeg";
+import { useSupabaseList } from "@/hooks/useSupabaseList";
 
 type Advisor = {
   name: string;
@@ -13,32 +12,12 @@ type Advisor = {
   photo?: string;
 };
 
-const advisors: Advisor[] = [
-  {
-    name: "Dr. Md. Mahmudul Hassan",
-    title: "Chief Advisor",
-    department:
-      "Department of Genetics and Plant Breeding, Faculty of Agriculture",
-    office:
-      "PSTU, Dumki, Patuakhali-8602",
-    phone: "+8801707006769",
-    email: "mhassan@pstu.ac.bd",
-    photo: advisor2,
-  },
-  {
-    name: "Dr. Md. Rajib Sharker",
-    title: "Advisor",
-    department:
-      "Department of Fisheries Biology and Genetics, Faculty of Fisheries",
-    office:
-      "PSTU, Dumki, Patuakhali-8602",
-    phone: "01726227578",
-    email: "mrsharker@pstu.ac.bd",
-    photo: advisor1,
-  },
-];
+
 
 const Advisors = () => {
+  const { data: records = [] } = useSupabaseList<any>("team_members", { orderBy: "id", ascending: true });
+  const advisors = records.filter((member: any) => ["advisor", "faculty", "chief advisor"].includes(String(member.role || member.title || "").toLowerCase()));
+
   return (
     <section className="py-20 bg-background" id="advisors">
       <div className="container mx-auto px-4">

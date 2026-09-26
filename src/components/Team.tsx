@@ -1,58 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Facebook, Linkedin, Mail, Phone } from "lucide-react";
-import advisor1 from "@/assets/advisor/advisor1.jpeg";
-import Executive2025 from "@/components/Executive2025";
+import { useSupabaseList } from "@/hooks/useSupabaseList";
 
 const Team = () => {
-  const executiveCommittee = [
-    {
-      name: "Student President",
-      role: "President",
-      department: "Biotechnology",
-      bio: "Leading the club's vision and coordinating all activities"
-    },
-    {
-      name: "Vice President",
-      role: "Vice President",
-      department: "Computer Science",
-      bio: "Managing technical workshops and project development"
-    },
-    {
-      name: "General Secretary",
-      role: "General Secretary",
-      department: "Biochemistry",
-      bio: "Organizing events and maintaining club records"
-    },
-    {
-      name: "Treasurer",
-      role: "Treasurer",
-      department: "Microbiology",
-      bio: "Managing club finances and sponsorships"
-    }
-  ];
+  const { data: executiveCommittee = [] } = useSupabaseList<any>("team_members", { orderBy: "id", ascending: true });
+  const advisors = executiveCommittee.filter((member: any) => ["advisor", "faculty", "chief advisor"].includes(String(member.role || member.title || "").toLowerCase()));
+  const teamMembers = executiveCommittee.filter((member: any) => !advisors.includes(member));
 
-  const advisors = [
-    {
-      name: "Dr. Md. Mahmudul Hassan",
-      title: "Chief Advisor",
-      department: "Department of Genetics and Plant Breeding, Faculty of Agriculture",
-      office:
-        "Patuakhali Science and Technology University, Dumki, Patuakhali-8602",
-      phone: "+8801707006769",
-      email: "mhassan@pstu.ac.bd",
-      photo: undefined,
-    },
-    {
-      name: "Dr. Md. Rajib Sharker",
-      title: "Advisor",
-      department: "Department of Fisheries Biology and Genetics, Faculty of Fisheries",
-      office:
-        "Patuakhali Science and Technology University, Dumki, Patuakhali-8602",
-      phone: "01726227578",
-      email: "mrsharker@pstu.ac.bd",
-      photo: advisor1,
-    },
-  ];
 
   return (
     <section id="team" className="py-20 bg-muted">
@@ -78,8 +32,8 @@ const Team = () => {
               >
                 <CardContent className="p-8 text-center">
                   <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-card shadow-md">
-                    {advisor.photo ? (
-                      <img src={advisor.photo} alt={advisor.name} className="w-full h-full object-cover" />
+                    {advisor.image_url ? (
+                      <img src={advisor.image_url} alt={advisor.name} className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-3xl font-bold text-foreground">
                         {advisor.name.split(' ')[1]?.[0] || advisor.name[0]}
@@ -109,7 +63,7 @@ const Team = () => {
         {/* Executive Committee */}
         <div>
           <h3 className="text-3xl font-bold text-center mb-8">Executive Committee</h3>
-          <Executive2025 />
+          {teamMembers.length === 0 ? <p className="text-center text-muted-foreground">No team members published yet.</p> : <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{teamMembers.map((member: any) => <Card key={member.id} className="border-0 shadow-lg"><CardContent className="p-6 text-center"><div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full bg-card">{member.image_url ? <img src={member.image_url} alt={member.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-primary">{String(member.name || "?").charAt(0)}</div>}</div><h4 className="font-semibold">{member.name}</h4><p className="mt-1 text-sm text-primary">{member.role}</p><p className="mt-2 text-sm text-muted-foreground">{member.department || member.bio}</p></CardContent></Card>)}</div>}
         </div>
 
         <div className="mt-12 text-center">
