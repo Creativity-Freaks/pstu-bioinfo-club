@@ -342,7 +342,8 @@ const AdminPage = () => {
       const currentEmail = (session?.user?.email || "").toLowerCase();
       const domainMatch = allowedDomain ? currentEmail.endsWith("@" + allowedDomain) || currentEmail.endsWith("." + allowedDomain) || currentEmail.includes("@" + allowedDomain) : false;
       const emailMatch = allowedEmail ? currentEmail === allowedEmail : false;
-      setIsAuthorized(!!session && (emailMatch || domainMatch || (!allowedEmail && !allowedDomain))); // if no env constraints, any authed user
+      const roleMatch = session?.user?.app_metadata?.role === "admin" || session?.user?.app_metadata?.role === "moderator";
+      setIsAuthorized(!!session && (roleMatch || emailMatch || domainMatch || (!allowedEmail && !allowedDomain)));
     })();
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthed(!!session);
@@ -353,7 +354,8 @@ const AdminPage = () => {
       const currentEmail = (session?.user?.email || "").toLowerCase();
       const domainMatch = allowedDomain ? currentEmail.endsWith("@" + allowedDomain) || currentEmail.endsWith("." + allowedDomain) || currentEmail.includes("@" + allowedDomain) : false;
       const emailMatch = allowedEmail ? currentEmail === allowedEmail : false;
-      const authorized = !!session && (emailMatch || domainMatch || (!allowedEmail && !allowedDomain));
+      const roleMatch = session?.user?.app_metadata?.role === "admin" || session?.user?.app_metadata?.role === "moderator";
+      const authorized = !!session && (roleMatch || emailMatch || domainMatch || (!allowedEmail && !allowedDomain));
       setIsAuthorized(authorized);
       if (!!session && !authorized) {
         // Immediately sign out unauthorized users
