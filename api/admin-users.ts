@@ -7,8 +7,9 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 function getAdmin() {
   const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
-  if (!url || !key) throw new Error("Supabase server credentials are not configured");
-  return createClient(url, key);
+  if (!url) throw new Error("SUPABASE_URL is not configured on the server");
+  if (!key) throw new Error("SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SECRET_KEY is not configured on the server");
+  return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
 }
 
 export default async function handler(request: Request): Promise<Response> {
