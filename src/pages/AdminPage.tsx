@@ -25,7 +25,8 @@ const AdminPage = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [authEmail, setAuthEmail] = useState("");
+  const configuredAdminEmail = (import.meta.env.VITE_ADMIN_EMAIL || "bioinformaticsclubpstu@gmail.com").trim().toLowerCase();
+  const [authEmail, setAuthEmail] = useState(configuredAdminEmail);
   const [authPassword, setAuthPassword] = useState("");
   const [authMsg, setAuthMsg] = useState<string | null>(null);
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
@@ -326,7 +327,7 @@ const AdminPage = () => {
       const session = data.session;
       setIsAuthed(!!session);
       setSessionEmail(session?.user?.email ?? null);
-      const allowedEmail = (import.meta.env.VITE_ADMIN_EMAIL || "").toLowerCase();
+      const allowedEmail = configuredAdminEmail;
       const allowedDomainRaw = (import.meta.env.VITE_ADMIN_EMAIL_DOMAIN || "").toLowerCase();
       const allowedDomain = allowedDomainRaw.replace(/^.*@/, "");
       const currentEmail = (session?.user?.email || "").toLowerCase();
@@ -337,7 +338,7 @@ const AdminPage = () => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthed(!!session);
       setSessionEmail(session?.user?.email ?? null);
-      const allowedEmail = (import.meta.env.VITE_ADMIN_EMAIL || "").toLowerCase();
+      const allowedEmail = configuredAdminEmail;
       const allowedDomainRaw = (import.meta.env.VITE_ADMIN_EMAIL_DOMAIN || "").toLowerCase();
       const allowedDomain = allowedDomainRaw.replace(/^.*@/, "");
       const currentEmail = (session?.user?.email || "").toLowerCase();
