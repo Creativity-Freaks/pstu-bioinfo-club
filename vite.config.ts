@@ -9,12 +9,24 @@ export default defineConfig(({ mode }) => {
   return {
   define: {
     "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(
-      env.VITE_SUPABASE_URL || env.SUPABASE_URL_4 || env.SUPABASE_URL,
+      env.VITE_SUPABASE_URL ||
+        env.SUPABASE_URL_4 ||
+        env.SUPABASE_URL ||
+        process.env.VITE_SUPABASE_URL ||
+        process.env.SUPABASE_URL_4 ||
+        process.env.SUPABASE_URL ||
+        "",
     ),
     "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(
       env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+        env.VITE_SUPABASE_ANON_KEY ||
         env.SUPABASE_PUBLISHABLE_KEY_3 ||
-        env.SUPABASE_PUBLISHABLE_KEY,
+        env.SUPABASE_PUBLISHABLE_KEY ||
+        process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+        process.env.VITE_SUPABASE_ANON_KEY ||
+        process.env.SUPABASE_PUBLISHABLE_KEY_3 ||
+        process.env.SUPABASE_PUBLISHABLE_KEY ||
+        "",
     ),
   },
   server: {
