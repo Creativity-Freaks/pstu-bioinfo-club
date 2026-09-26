@@ -1,5 +1,4 @@
 import siteLogo from "@/assets/logo.png";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -10,9 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 const AdminNavbar = () => {
   const [isAuthed, setIsAuthed] = useState(false);
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
-  const [authEmail, setAuthEmail] = useState("");
-  const [authPassword, setAuthPassword] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,20 +26,8 @@ const AdminNavbar = () => {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  const handleSignIn = async () => {
-    setMessage(null);
-    if (!authEmail || !authPassword) {
-      setMessage("Enter email and password.");
-      return;
-    }
-    const { error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword });
-    if (error) setMessage(error.message);
-    else setMessage("Signed in.");
-  };
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    setMessage("Signed out.");
   };
 
   const handleRefresh = () => window.location.reload();
@@ -64,13 +49,7 @@ const AdminNavbar = () => {
           {sessionEmail && (
             <span className="text-sm text-muted-foreground hidden md:inline">Signed in as {sessionEmail}</span>
           )}
-          {!isAuthed ? (
-            <>
-              <Input placeholder="admin@club.com" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="w-56" />
-              <Input type="password" placeholder="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} className="w-40" />
-              <Button variant="outline" size="sm" onClick={handleSignIn}>Sign In</Button>
-            </>
-          ) : (
+          {isAuthed && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="w-8 h-8 cursor-pointer">
@@ -89,7 +68,6 @@ const AdminNavbar = () => {
           <Button variant="secondary" size="sm" onClick={handleReloadData}>Reload Data</Button>
         </div>
       </div>
-      {message && <div className="px-4 pb-2 text-sm text-muted-foreground">{message}</div>}
     </header>
   );
 };
