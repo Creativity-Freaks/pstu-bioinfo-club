@@ -17,7 +17,10 @@ export default async function handler(request: Request): Promise<Response> {
     const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
     if (!token) return json({ error: "Authentication required" }, 401);
     const { data: actor, error: actorError } = await admin.auth.getUser(token);
-    if (actorError || actor.user?.app_metadata?.role !== "admin") return json({ error: "Admin access required" }, 403);
+    const configuredAdminEmail = String(process.env.ADMIN_EMAIL || process.env.VITE_ADMIN_EMAIL || "").trim().toLowerCase();
+    const actorEmail = String(actor.user?.email || "").trim().toLowerCase();
+    const isAdmin = actor.user?.app_metadata?.role === "admin" || (configuredAdminEmail && actorEmail === configuredAdminEmail);
+    if (actorError || !isAdmin) return json({ error: "Admin access required" }, 403);
     if (request.method === "GET") {
       const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
       if (error) return json({ error: error.message }, 500);

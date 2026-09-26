@@ -31,6 +31,7 @@ const AdminPage = () => {
   const [authPassword, setAuthPassword] = useState("");
   const [authMsg, setAuthMsg] = useState<string | null>(null);
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
+  const [sessionRole, setSessionRole] = useState<"admin" | "moderator" | null>(null);
   const [counts, setCounts] = useState<Record<Entity, number | null>>({
     dashboard: null,
     courses: null,
@@ -282,7 +283,7 @@ const AdminPage = () => {
       const msg = e instanceof Error ? e.message : String(e);
       setErrorMsg(msg);
     }
-  }, [active, isAuthorized]);
+  }, [active, isAuthorized, sessionRole]);
 
   // Image upload is deferred until Create/Update.
 
@@ -319,7 +320,8 @@ const AdminPage = () => {
   );
 
   useEffect(() => {
-    loadRows();
+  if (active === "users" && sessionRole !== "admin") setActive("dashboard");
+  loadRows();
     setForm({});
     setPage(1);
   }, [loadRows]);
@@ -340,6 +342,8 @@ const AdminPage = () => {
       const session = data.session;
       setIsAuthed(!!session);
       setSessionEmail(session?.user?.email ?? null);
+      const role = session?.user?.app_metadata?.role === "admin" || session?.user?.email?.toLowerCase() === configuredAdminEmail ? "admin" : session?.user?.app_metadata?.role === "moderator" ? "moderator" : null;
+      setSessionRole(role);
       const allowedEmail = configuredAdminEmail;
       const allowedDomainRaw = (import.meta.env.VITE_ADMIN_EMAIL_DOMAIN || "").toLowerCase();
       const allowedDomain = allowedDomainRaw.replace(/^.*@/, "");
@@ -352,6 +356,8 @@ const AdminPage = () => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthed(!!session);
       setSessionEmail(session?.user?.email ?? null);
+      const role = session?.user?.app_metadata?.role === "admin" || session?.user?.email?.toLowerCase() === configuredAdminEmail ? "admin" : session?.user?.app_metadata?.role === "moderator" ? "moderator" : null;
+      setSessionRole(role);
       const allowedEmail = configuredAdminEmail;
       const allowedDomainRaw = (import.meta.env.VITE_ADMIN_EMAIL_DOMAIN || "").toLowerCase();
       const allowedDomain = allowedDomainRaw.replace(/^.*@/, "");
@@ -605,7 +611,7 @@ const AdminPage = () => {
   { key: "partners", label: "Partners", icon: Users },
   { key: "about_sections", label: "About page", icon: FileText },
   { key: "users", label: "Users & roles", icon: UserCog },
-                          ].map((item) => {
+                          ].filter((item) => sessionRole === "admin" || item.key !== "users").map((item) => {
                             const Icon = item.icon as ElementType;
                             const activeItem = active === item.key;
                             return (
@@ -618,7 +624,7 @@ const AdminPage = () => {
                                     <Icon className="w-4 h-4" />
                                   <span>{item.label}</span>
                                 </span>
-                                {item.key !== "dashboard" && (
+                                {item.key !== "dashboard" && item.key !== "users" && (
                                   <span className="text-xs px-2 py-0.5 rounded bg-muted text-foreground">
                                     {counts[item.key as Entity] ?? "–"}
                                   </span>
@@ -638,10 +644,10 @@ const AdminPage = () => {
 
                     {/* Main */}
                     <main className="w-full min-w-0">
-                      {active === "users" ? <AdminUsersPanel /> : <>
+                      {active === "users" && sessionRole === "admin" ? <AdminUsersPanel /> : <>
                       <div className="mb-6 flex items-end justify-between border-b border-white/[0.08] pb-5">
                         <div><p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">Control center</p><h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">Content management</h2></div>
-                        <span className="hidden text-xs text-slate-500 sm:block">Live Supabase workspace</span>
+                        <span className="hidden text-xs text-slate-500 sm:block">Live Supabase workspace · {sessionRole === "admin" ? "Admin" : "Moderator"}</span>
                       </div>
                           {/* Dashboard Overview */}
                           <TabsContent value="dashboard">
