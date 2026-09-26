@@ -49,9 +49,6 @@ const AdminNavbar = () => {
           
         </div>
         <div className="flex items-center gap-2">
-          {sessionEmail && (
-            <span className="text-sm text-muted-foreground hidden md:inline">Signed in as {sessionEmail}</span>
-          )}
           {isAuthed && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -69,8 +66,7 @@ const AdminNavbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          <Button variant="outline" size="sm" onClick={handleRefresh}>Refresh</Button>
-          <Button variant="secondary" size="sm" onClick={handleReloadData}>Reload Data</Button>
+
         </div>
       </div>
     </header>
