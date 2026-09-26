@@ -168,3 +168,85 @@ ALTER TABLE public.blog_posts DISABLE ROW LEVEL SECURITY;
 -- Note: Storage doesn't support DISABLE RLS per bucket. If you want
 -- public image access without policies, use server-side proxy for uploads
 -- and downloads, or toggle bucket to "Public" in the UI (which creates policies).
+
+-- ==========================================================
+-- Homepage and About CMS content
+-- Run this section after the base schema above.
+-- ==========================================================
+create table if not exists public.faqs (
+  id bigserial primary key,
+  question text not null,
+  answer text not null,
+  sort_order integer default 0,
+  created_at timestamptz default now()
+);
+
+create table if not exists public.testimonials (
+  id bigserial primary key,
+  name text not null,
+  role text,
+  content text not null,
+  avatar_url text,
+  rating integer default 5 check (rating between 1 and 5),
+  created_at timestamptz default now()
+);
+
+create table if not exists public.partners (
+  id bigserial primary key,
+  name text not null,
+  type text,
+  description text,
+  logo_url text,
+  url text,
+  sort_order integer default 0,
+  created_at timestamptz default now()
+);
+
+create table if not exists public.about_sections (
+  id bigserial primary key,
+  section_key text unique not null,
+  title text not null,
+  content text,
+  image_url text,
+  sort_order integer default 0,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- Required columns used by the live public pages.
+alter table public.team_members add column if not exists department text;
+alter table public.team_members add column if not exists image_url text;
+alter table public.events add column if not exists type text;
+alter table public.events add column if not exists image_url text;
+alter table public.courses add column if not exists image_url text;
+
+-- Enable RLS for the new CMS tables.
+alter table public.faqs enable row level security;
+alter table public.testimonials enable row level security;
+alter table public.partners enable row level security;
+alter table public.about_sections enable row level security;
+
+-- Public visitors can read published CMS content.
+drop policy if exists "Public read faqs" on public.faqs;
+create policy "Public read faqs" on public.faqs for select to anon, authenticated using (true);
+drop policy if exists "Public read testimonials" on public.testimonials;
+create policy "Public read testimonials" on public.testimonials for select to anon, authenticated using (true);
+drop policy if exists "Public read partners" on public.partners;
+create policy "Public read partners" on public.partners for select to anon, authenticated using (true);
+drop policy if exists "Public read about sections" on public.about_sections;
+create policy "Public read about sections" on public.about_sections for select to anon, authenticated using (true);
+
+-- Only authenticated admin/moderator users can manage CMS content.
+drop policy if exists "Staff manage faqs" on public.faqs;
+create policy "Staff manage faqs" on public.faqs for all to authenticated using ((auth.jwt() -> 'app_metadata' ->> 'role') in ('admin', 'moderator')) with check ((auth.jwt() -> 'app_metadata' ->> 'role') in ('admin', 'moderator'));
+drop policy if exists "Staff manage testimonials" on public.testimonials;
+create policy "Staff manage testimonials" on public.testimonials for all to authenticated using ((auth.jwt() -> 'app_metadata' ->> 'role') in ('admin', 'moderator')) with check ((auth.jwt() -> 'app_metadata' ->> 'role') in ('admin', 'moderator'));
+drop policy if exists "Staff manage partners" on public.partners;
+create policy "Staff manage partners" on public.partners for all to authenticated using ((auth.jwt() -> 'app_metadata' ->> 'role') in ('admin', 'moderator')) with check ((auth.jwt() -> 'app_metadata' ->> 'role') in ('admin', 'moderator'));
+drop policy if exists "Staff manage about sections" on public.about_sections;
+create policy "Staff manage about sections" on public.about_sections for all to authenticated using ((auth.jwt() -> 'app_metadata' ->> 'role') in ('admin', 'moderator')) with check ((auth.jwt() -> 'app_metadata' ->> 'role') in ('admin', 'moderator'));
+
+-- Storage buckets used by the app. Keep profile uploads private; public
+-- content images can be read through their public URL when the bucket is public.
+insert into storage.buckets (id, name, public) values ('admin-profiles', 'admin-profiles', false) on conflict (id) do nothing;
+insert into storage.buckets (id, name, public) values ('content-images', 'content-images', true) on conflict (id) do nothing;
