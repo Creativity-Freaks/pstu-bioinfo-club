@@ -106,7 +106,7 @@ const AdminPage = () => {
       const uploadUrlTimeout = window.setTimeout(() => uploadUrlController.abort(), REQUEST_TIMEOUT_MS);
       const res = await fetch(api, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ""}` },
         body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
         signal: uploadUrlController.signal,
       });
@@ -435,7 +435,7 @@ const AdminPage = () => {
         const msg = await parseApiError(res);
 
         // If API isn't available (common on local `vite dev`) or server is missing env, fallback to client
-        const shouldFallback = res.status === 404 || res.status === 405 || /Missing SUPABASE_SERVICE_ROLE_KEY/i.test(msg);
+        const shouldFallback = false;
         if (shouldFallback) {
           await tryClientUpsert(msg);
         } else {
@@ -498,7 +498,7 @@ const AdminPage = () => {
       window.clearTimeout(timeout);
       if (!res.ok) {
         const msg = await parseApiError(res);
-        const shouldFallback = res.status === 404 || res.status === 405 || /Missing SUPABASE_SERVICE_ROLE_KEY/i.test(msg);
+        const shouldFallback = false;
         if (shouldFallback) {
           await tryClientDelete();
         } else {
