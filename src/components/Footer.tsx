@@ -157,7 +157,7 @@ const Footer = () => {
             <span className="inline-flex items-center gap-2">
               <span className="uppercase tracking-wider text-primary/80">Designed & Developed by</span>
               <a
-                href="https://cftechlab.hcsarker.me"
+                href="https://cftechlab.tech"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-gradient-primary text-primary-foreground font-semibold hover:opacity-90 transition-transform"
