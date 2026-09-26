@@ -8,7 +8,7 @@ import FloatingActions from "@/components/FloatingActions";
 import { useSupabaseList } from "@/hooks/useSupabaseList";
 
 const EventsPage = () => {
-  const upcomingWorkshops = [
+  const upcomingWorkshopsLegacy = [
     {
       title: "Introduction to Python Programming",
       date: "March 15, 2024",
@@ -41,7 +41,7 @@ const EventsPage = () => {
     },
   ];
 
-  const upcomingSeminars = [
+  const upcomingSeminarsLegacy = [
     {
       title: "Future of Personalized Medicine",
       speaker: "Dr. Sarah Johnson",
@@ -71,7 +71,7 @@ const EventsPage = () => {
     },
   ];
 
-  const upcomingEvents = [
+  const upcomingEventsLegacy = [
     {
       title: "Bioinformatics Hackathon 2025",
       date: "April 5-6, 2025",
@@ -96,7 +96,7 @@ const EventsPage = () => {
     }
   ];
 
-  const pastEvents = [
+  const pastEventsLegacy = [
     {
       title: "Protein Structure Prediction Workshop",
       date: "February 20, 2025",
@@ -147,7 +147,12 @@ const EventsPage = () => {
     description?: string;
     date?: string;
     location?: string;
-  }>("events", { orderBy: "id", ascending: false, limit: 9 });
+  }>("events", { orderBy: "id", ascending: false, limit: 100 });
+  const liveEvents = dbEvents ?? [];
+  const upcomingWorkshops = liveEvents.filter((item) => String((item as any).type || "").toLowerCase() === "workshop");
+  const upcomingSeminars = liveEvents.filter((item) => String((item as any).type || "").toLowerCase() === "seminar");
+  const upcomingEvents = liveEvents.filter((item) => !["workshop", "seminar"].includes(String((item as any).type || "").toLowerCase()) && new Date(item.date || 0) >= new Date());
+  const pastEvents = liveEvents.filter((item) => new Date(item.date || 0) < new Date());
 
   return (
     <div className="min-h-screen">

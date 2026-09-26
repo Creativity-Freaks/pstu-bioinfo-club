@@ -8,9 +8,13 @@ import advisor1 from "@/assets/advisor/advisor1.jpeg";
 import advisor2 from "@/assets/advisor/advisor2.jpeg";
 import { Button } from "@/components/ui/button";
 import Executive2025 from "@/components/Executive2025";
+import { useSupabaseList } from "@/hooks/useSupabaseList";
 
 const TeamPage = () => {
-  const executiveCommittee = [
+  const { data: executiveCommittee = [] } = useSupabaseList<any>("team_members", { orderBy: "id", ascending: true });
+  const advisors: any[] = [];
+  /* Database-managed team records replace the former local roster. */
+  const executiveCommitteeLegacy = [
     {
       name: "Student President",
       role: "President",
@@ -67,7 +71,7 @@ const TeamPage = () => {
     }
   ];
 
-  const advisors = [
+  const advisorsLegacy = [
     {
       name: "Dr. Md. Mahmudul Hassan",
       title: "Chief Advisor",
