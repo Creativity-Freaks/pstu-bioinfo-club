@@ -914,7 +914,9 @@ const AdminPage = () => {
                 </Tabs>
               )}
               <footer className="mt-8 border-t border-slate-800/80 py-4 text-center text-[11px] text-slate-600">
-                Admin workspace · PSTU Bioinformatics Club
+                <span>Admin workspace · PSTU Bioinformatics Club</span>
+                <span className="mx-2 text-slate-700">·</span>
+                <a href="https://cftechlab.tech" target="_blank" rel="noopener noreferrer" className="text-slate-500 transition-colors hover:text-cyan-300">Built by CF TechLab</a>
               </footer>
             </>
           ) : (
