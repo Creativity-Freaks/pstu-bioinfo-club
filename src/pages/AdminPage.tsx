@@ -548,42 +548,23 @@ const AdminPage = () => {
                 <div className="flex items-center gap-2 text-xs text-slate-400"><span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]" /> Supabase live data</div>
               </div>
               {!isAuthorized ? (
-                <div className="relative isolate flex min-h-[calc(100vh-7rem)] items-center justify-center overflow-hidden rounded-3xl bg-slate-950 px-4 py-10 text-white shadow-2xl">
-                  <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(20,184,166,0.24),transparent_36%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.22),transparent_34%)]" />
-                  <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-white/[0.06] shadow-2xl backdrop-blur-xl md:grid-cols-[1.05fr_0.95fr]">
-                    <div className="hidden flex-col justify-between p-10 md:flex lg:p-14">
-                      <div>
-                        <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-400/15 text-teal-300 ring-1 ring-teal-300/30">
-                          <ShieldCheck className="h-7 w-7" aria-hidden="true" />
-                        </div>
-                        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-teal-300">PSTU Bioinformatics Club</p>
-                        <h2 className="max-w-md text-4xl font-bold leading-tight tracking-tight lg:text-5xl">Manage your club, all in one place.</h2>
-                        <p className="mt-5 max-w-md text-base leading-7 text-slate-300">Publish updates, organize events, review members, and keep every part of the public site up to date.</p>
+                <div className="flex min-h-[calc(100vh-9rem)] items-center justify-center px-4 py-10 sm:px-6">
+                  <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#11151c] p-6 shadow-xl shadow-black/20 sm:p-8">
+                    <div className="mb-8 text-center">
+                      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300 ring-1 ring-cyan-300/20">
+                        <LockKeyhole className="h-5 w-5" aria-hidden="true" />
                       </div>
-                      <div className="space-y-4 text-sm text-slate-300">
-                        {["Secure Supabase authentication", "Live content management", "One dashboard for every section"].map((item) => (
-                          <div key={item} className="flex items-center gap-3"><CheckCircle2 className="h-4 w-4 text-teal-300" aria-hidden="true" /><span>{item}</span></div>
-                        ))}
-                      </div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300">PSTU Bioinformatics Club</p>
+                      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">Admin sign in</h1>
+                      <p className="mt-2 text-sm text-slate-400">Sign in to manage your club website.</p>
                     </div>
-                    <div className="bg-white p-7 text-slate-900 sm:p-10 lg:p-14">
-                      <div className="mb-8 flex items-center gap-3 md:hidden">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-50 text-teal-700"><ShieldCheck className="h-6 w-6" aria-hidden="true" /></div>
-                        <div><p className="text-xs font-bold uppercase tracking-widest text-teal-700">PSTU Bioinformatics</p><p className="text-sm text-slate-500">Club administration</p></div>
-                      </div>
-                      <div className="mb-8">
-                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-teal-300"><LockKeyhole className="h-5 w-5" aria-hidden="true" /></div>
-                        <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
-                        <p className="mt-2 text-sm leading-6 text-slate-500">Sign in to access the admin dashboard.</p>
-                      </div>
-                      <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void handleSignIn(); }}>
-                        <div className="space-y-2"><label htmlFor="admin-email" className="text-sm font-medium text-slate-700">Admin email</label><Input id="admin-email" type="email" autoComplete="email" placeholder="admin@pstu.ac.bd" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="h-12 border-slate-200 bg-slate-50 px-4" /></div>
-                        <div className="space-y-2"><div className="flex items-center justify-between"><label htmlFor="admin-password" className="text-sm font-medium text-slate-700">Password</label><span className="text-xs text-slate-400">Protected access</span></div><Input id="admin-password" type="password" autoComplete="current-password" placeholder="Enter your password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} className="h-12 border-slate-200 bg-slate-50 px-4" /></div>
-                        {authMsg && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{authMsg}</div>}
-                        <Button type="submit" className="h-12 w-full bg-slate-900 text-white hover:bg-slate-800">Sign in to dashboard <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" /></Button>
-                      </form>
-                      <p className="mt-8 flex items-center justify-center gap-2 text-center text-xs text-slate-400"><LockKeyhole className="h-3.5 w-3.5" aria-hidden="true" /> Your session is secured by Supabase Auth</p>
-                    </div>
+                    <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void handleSignIn(); }}>
+                      <div className="space-y-2"><label htmlFor="admin-email" className="text-sm font-medium text-slate-300">Email address</label><Input id="admin-email" type="email" autoComplete="email" placeholder="admin@pstu.ac.bd" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="h-11 border-white/10 bg-[#0b0d12] px-3 text-white placeholder:text-slate-600 focus-visible:ring-cyan-400/40" /></div>
+                      <div className="space-y-2"><label htmlFor="admin-password" className="text-sm font-medium text-slate-300">Password</label><Input id="admin-password" type="password" autoComplete="current-password" placeholder="Enter your password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} className="h-11 border-white/10 bg-[#0b0d12] px-3 text-white placeholder:text-slate-600 focus-visible:ring-cyan-400/40" /></div>
+                      {authMsg && <div role="alert" className="rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2.5 text-sm text-red-300">{authMsg}</div>}
+                      <Button type="submit" className="h-11 w-full bg-cyan-400 font-semibold text-slate-950 hover:bg-cyan-300">Continue <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" /></Button>
+                    </form>
+                    <p className="mt-6 text-center text-xs text-slate-500">Secure access powered by Supabase Auth</p>
                   </div>
                 </div>
               ) : (
