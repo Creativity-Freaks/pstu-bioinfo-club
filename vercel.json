@@ -1,10 +1,5 @@
 {
   "buildCommand": "bun run build || npm run build",
   "outputDirectory": "dist",
-  "framework": "vite",
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/.*", "dest": "/index.html" }
-  ]
+  "framework": "vite"
 }
