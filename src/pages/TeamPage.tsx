@@ -4,97 +4,12 @@ import FloatingActions from "@/components/FloatingActions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Facebook, Linkedin, Mail, Award, Users, Phone } from "lucide-react";
-import advisor1 from "@/assets/advisor/advisor1.jpeg";
-import advisor2 from "@/assets/advisor/advisor2.jpeg";
 import { Button } from "@/components/ui/button";
-import Executive2025 from "@/components/Executive2025";
+import { useSupabaseList } from "@/hooks/useSupabaseList";
 
 const TeamPage = () => {
-  const executiveCommittee = [
-    {
-      name: "Student President",
-      role: "President",
-      department: "Biotechnology",
-      year: "4th Year",
-      bio: "Leading the club's vision and coordinating all activities. Passionate about genomics and computational biology.",
-      achievements: "Published 2 research papers, organized 5+ major events",
-      expertise: "Python, R, Genomic Analysis"
-    },
-    {
-      name: "Vice President",
-      role: "Vice President",
-      department: "Computer Science",
-      year: "3rd Year",
-      bio: "Managing technical workshops and project development. Specializes in machine learning applications in biology.",
-      achievements: "Winner of National Bioinformatics Hackathon 2024",
-      expertise: "Machine Learning, Deep Learning, Data Science"
-    },
-    {
-      name: "General Secretary",
-      role: "General Secretary",
-      department: "Biochemistry",
-      year: "3rd Year",
-      bio: "Organizing events and maintaining club records. Focused on structural bioinformatics and drug design.",
-      achievements: "Coordinated 10+ workshops, maintaining 95% attendance",
-      expertise: "Molecular Docking, Protein Modeling"
-    },
-    {
-      name: "Treasurer",
-      role: "Treasurer",
-      department: "Microbiology",
-      year: "4th Year",
-      bio: "Managing club finances and sponsorships. Interested in metagenomics and microbiome analysis.",
-      achievements: "Secured funding for 3 major projects",
-      expertise: "Metagenomics, Statistical Analysis"
-    },
-    {
-      name: "Technical Lead",
-      role: "Technical Lead",
-      department: "Computer Science",
-      year: "3rd Year",
-      bio: "Managing the technical infrastructure and online platforms. Expert in web development and databases.",
-      achievements: "Developed club website and management system",
-      expertise: "Web Development, Database Management, Bioinformatics Tools"
-    },
-    {
-      name: "Workshop Coordinator",
-      role: "Workshop Coordinator",
-      department: "Biotechnology",
-      year: "2nd Year",
-      bio: "Planning and executing educational workshops. Passionate about teaching and knowledge sharing.",
-      achievements: "Organized 8 successful workshops with 300+ participants",
-      expertise: "Training, Python, Data Visualization"
-    }
-  ];
-
-  const advisors = [
-    {
-      name: "Dr. Md. Mahmudul Hassan",
-      title: "Chief Advisor",
-      department: "Department of Genetics and Plant Breeding, Faculty of Agriculture",
-      office:
-        "Patuakhali Science and Technology University, Dumki, Patuakhali-8602",
-      phone: "+8801707006769",
-      email: "mhassan@pstu.ac.bd",
-      photo: advisor2,
-      education: "PhD, The University Of Melbourne (2018), Australia; MSc, BAU (2010); BSc, PSTU (2008)",
-      research: "Genome Engineering, Synthetic Biology, Metabolic Engineering, Plant-Microbe Interaction",
-      publications: "40+ research articles in reputed journals",
-    },
-    {
-      name: "Dr. Md. Rajib Sharker",
-      title: "Advisor",
-      department: "Department of Fisheries Biology and Genetics, Faculty of Fisheries",
-      office:
-        "Patuakhali Science and Technology University, Dumki, Patuakhali-8602",
-      phone: "01726227578",
-      email: "mrsharker@pstu.ac.bd",
-      photo: advisor1,
-      education: "PhD, Chonnam National University (2020), South Korea; MSc, BAU (2012); BSc, BAU (2010)",
-      research: "Molecular genetics, gene expression, Population genetics, Nutrigenomics",
-      publications: "37+ research articles in reputed journals",
-    },
-  ];
+  const { data: executiveCommittee = [] } = useSupabaseList<any>("team_members", { orderBy: "id", ascending: true });
+  const advisors = executiveCommittee.filter((member: any) => ["advisor", "faculty", "chief advisor"].includes(String(member.role || member.title || "").toLowerCase()));
 
   return (
     <div className="min-h-screen">
@@ -181,7 +96,7 @@ const TeamPage = () => {
                 <CardContent className="p-8">
                   <div className="text-center mb-6">
                     <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden bg-card shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
-                      <img src={advisor.photo} alt={advisor.name} className="w-full h-full object-cover" />
+                      {advisor.image_url ? <img src={advisor.image_url} alt={advisor.name} className="w-full h-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-3xl font-semibold text-primary">{String(advisor.name || "?").charAt(0)}</div>}
                     </div>
                     <h3 className="text-2xl font-bold mb-2">{advisor.name}</h3>
                     <p className="text-primary font-medium text-lg mb-1">{advisor.title}</p>
@@ -238,7 +153,7 @@ const TeamPage = () => {
             </p>
           </div>
 
-          <Executive2025 />
+          {executiveCommittee.filter((member: any) => !advisors.includes(member)).length === 0 ? <p className="py-12 text-center text-muted-foreground">No team members published yet.</p> : <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{executiveCommittee.filter((member: any) => !advisors.includes(member)).map((member: any) => <Card key={member.id} className="border-0 shadow-elegant"><CardContent className="p-6 text-center"><div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full bg-card">{member.image_url ? <img src={member.image_url} alt={member.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-primary">{String(member.name || "?").charAt(0)}</div>}</div><h3 className="text-xl font-semibold">{member.name}</h3><p className="mt-1 text-primary">{member.role}</p><p className="mt-2 text-sm text-muted-foreground">{member.department || member.bio}</p></CardContent></Card>)}</div>}
         </div>
       </section>
 

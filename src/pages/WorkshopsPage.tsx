@@ -5,62 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, MapPin, Users } from "lucide-react";
+import { useSupabaseList } from "@/hooks/useSupabaseList";
 
 const WorkshopsPage = () => {
-  const workshops = [
-    {
-      id: 1,
-      title: "Introduction to Genomics Data Analysis",
-      date: "April 15, 2025",
-      time: "2:00 PM - 5:00 PM",
-      location: "Computer Lab, PSTU",
-      instructor: "Dr. Rahman Ahmed",
-      seats: 30,
-      level: "Beginner",
-      description: "Learn the fundamentals of genomics data analysis using modern bioinformatics tools and techniques.",
-    },
-    {
-      id: 2,
-      title: "Python for Bioinformatics",
-      date: "April 22, 2025",
-      time: "10:00 AM - 2:00 PM",
-      location: "Seminar Hall, PSTU",
-      instructor: "Prof. Sultana Begum",
-      seats: 40,
-      level: "Intermediate",
-      description: "Master Python programming for biological data analysis, including Biopython and data visualization.",
-    },
-    {
-      id: 3,
-      title: "Machine Learning in Drug Discovery",
-      date: "May 5, 2025",
-      time: "9:00 AM - 4:00 PM",
-      location: "Research Center, PSTU",
-      instructor: "Dr. Karim Hassan",
-      seats: 25,
-      level: "Advanced",
-      description: "Explore how machine learning is revolutionizing drug discovery and molecular design.",
-    },
-  ];
-
-  const seminars = [
-    {
-      id: 1,
-      title: "Career Opportunities in Bioinformatics",
-      date: "April 18, 2025",
-      time: "3:00 PM - 5:00 PM",
-      speaker: "Dr. Fatima Khan",
-      organization: "International Bioinformatics Institute",
-    },
-    {
-      id: 2,
-      title: "Recent Advances in Computational Biology",
-      date: "April 28, 2025",
-      time: "2:00 PM - 4:00 PM",
-      speaker: "Prof. Mahmud Ali",
-      organization: "PSTU Research Department",
-    },
-  ];
+  const { data: events = [] } = useSupabaseList<any>("events", { orderBy: "date", ascending: true });
+  const workshops = events.filter((item) => ["workshop", "workshops"].includes(String(item.type || item.category || "").toLowerCase()));
+  const seminars = events.filter((item) => ["seminar", "seminars"].includes(String(item.type || item.category || "").toLowerCase()));
 
   return (
     <div className="min-h-screen">
