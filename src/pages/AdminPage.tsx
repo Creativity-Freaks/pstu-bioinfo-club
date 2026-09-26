@@ -530,18 +530,23 @@ const AdminPage = () => {
   }, [loadRows, loadCounts]);
 
   return (
-      <div className="min-h-screen">
+      <div className={isAdminApp ? "min-h-screen bg-[#07111f] text-slate-100" : "min-h-screen"}>
       {!isAdminApp && <Navigation />}
       {!isAdminApp && <FloatingActions />}
 
      
 
-      <section className={isAdminApp ? "py-8" : "py-16"}>
-        <div className={isAdminApp ? "px-4" : "container mx-auto px-4"}>
+      <section className={isAdminApp ? "min-h-[calc(100vh-4rem)] px-4 py-6 lg:px-8" : "py-16"}>
+        <div className={isAdminApp ? "mx-auto max-w-[1600px]" : "container mx-auto px-4"}>
           {isAdminApp ? (
             <>
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold">Bioinformatics Club PSTU</h2>
+              <div className="mb-7 flex flex-col gap-4 border-b border-white/10 pb-6 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-300">Operations center</p>
+                  <h2 className="text-2xl font-semibold tracking-tight text-white">Bioinformatics Club PSTU</h2>
+                  <p className="mt-1 text-sm text-slate-400">Manage every public-facing section from one secure workspace.</p>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-400"><span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]" /> Supabase live data</div>
               </div>
               {!isAuthorized ? (
                 <div className="relative isolate flex min-h-[calc(100vh-7rem)] items-center justify-center overflow-hidden rounded-3xl bg-slate-950 px-4 py-10 text-white shadow-2xl">
@@ -586,10 +591,10 @@ const AdminPage = () => {
                 <Tabs value={active} onValueChange={(v) => setActive(v as Entity)}>
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                     {/* Sidebar */}
-                    <aside className="md:col-span-3 lg:col-span-2 sticky top-20">
-                      <Card>
+                    <aside className="md:col-span-3 lg:col-span-2 sticky top-24">
+                      <Card className="border-white/10 bg-[#0c1a2b] shadow-xl shadow-black/20">
                         <CardHeader>
-                          <CardTitle className="text-base">Sections</CardTitle>
+                          <div><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Workspace</p><CardTitle className="mt-2 text-base text-white">Content sections</CardTitle></div>
                         </CardHeader>
                         <CardContent className="space-y-1">
                           {[
@@ -607,7 +612,7 @@ const AdminPage = () => {
                             return (
                               <button
                                 key={item.key}
-                                className={`w-full text-left px-3 py-2 rounded-md flex items-center justify-between gap-2 transition-colors ${activeItem ? "bg-muted text-foreground" : "hover:bg-muted text-muted-foreground"}`}
+                                className={`w-full text-left px-3 py-2 rounded-md flex items-center justify-between gap-2 transition-colors ${activeItem ? "bg-cyan-400/15 text-cyan-200 ring-1 ring-cyan-300/20" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}
                                 onClick={() => setActive(item.key as Entity)}
                               >
                                 <span className="flex items-center gap-2">
@@ -628,9 +633,9 @@ const AdminPage = () => {
 
                     {/* Main */}
                     <div className="md:col-span-9 lg:col-span-10 w-full">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Content Management</CardTitle>
+                      <Card className="border-white/10 bg-[#0c1a2b] shadow-xl shadow-black/20">
+                        <CardHeader className="border-b border-white/10">
+                          <CardTitle className="text-white">Content management</CardTitle>
                         </CardHeader>
                         <CardContent>
                           {/* Dashboard Overview */}
@@ -912,6 +917,9 @@ const AdminPage = () => {
                   </div>
                 </Tabs>
               )}
+              <footer className="mt-8 flex flex-col gap-2 border-t border-white/10 pt-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+                <span>Bioinformatics Club PSTU Admin</span><span>Secure content operations · Supabase connected</span>
+              </footer>
             </>
           ) : (
             <Card className="mb-6">
