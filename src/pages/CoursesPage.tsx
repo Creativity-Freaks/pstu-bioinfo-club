@@ -8,63 +8,6 @@ import { BookOpen, Clock, Award, Users } from "lucide-react";
 import { useSupabaseList } from "@/hooks/useSupabaseList";
 
 const CoursesPage = () => {
-  const fallback = [
-    {
-      id: 1,
-      title: "Fundamentals of Bioinformatics",
-      description: "A comprehensive introduction to bioinformatics, covering basic concepts, tools, and techniques.",
-      duration: "8 weeks",
-      level: "Beginner",
-      students: 45,
-      modules: 12,
-    },
-    {
-      id: 2,
-      title: "Python for Biological Data Analysis",
-      description: "Learn Python programming specifically for analyzing biological datasets and sequences.",
-      duration: "10 weeks",
-      level: "Intermediate",
-      students: 35,
-      modules: 15,
-    },
-    {
-      id: 3,
-      title: "Genomics and Next-Gen Sequencing",
-      description: "Master genomics data analysis and NGS technologies for modern research applications.",
-      duration: "12 weeks",
-      level: "Advanced",
-      students: 25,
-      modules: 18,
-    },
-    {
-      id: 4,
-      title: "Machine Learning for Drug Discovery",
-      description: "Apply machine learning algorithms to drug discovery and molecular design problems.",
-      duration: "10 weeks",
-      level: "Advanced",
-      students: 20,
-      modules: 14,
-    },
-    {
-      id: 5,
-      title: "Structural Bioinformatics",
-      description: "Explore protein structures, modeling, and computational approaches in structural biology.",
-      duration: "8 weeks",
-      level: "Intermediate",
-      students: 30,
-      modules: 12,
-    },
-    {
-      id: 6,
-      title: "Computational Systems Biology",
-      description: "Study biological systems using computational and mathematical modeling approaches.",
-      duration: "12 weeks",
-      level: "Advanced",
-      students: 18,
-      modules: 16,
-    },
-  ];
-
   const { data, isLoading, error } = useSupabaseList<{
     id: number;
     title: string;
@@ -74,7 +17,7 @@ const CoursesPage = () => {
     modules?: number;
   }>("courses", { orderBy: "id", ascending: false });
 
-  const items = (data && data.length ? data : fallback);
+  const items = data ?? [];
 
   return (
     <div className="min-h-screen">
