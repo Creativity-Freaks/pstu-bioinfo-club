@@ -37,6 +37,7 @@ export default async function handler(request: Request): Promise<Response> {
     const id = String(body.id || "");
     if (!id) return json({ error: "Missing user id" }, 400);
     if (request.method === "DELETE") {
+      if (id === actor.user?.id) return json({ error: "You cannot delete your own account." }, 400);
       const { error } = await admin.auth.admin.deleteUser(id);
       if (error) return json({ error: error.message }, 400);
       return json({ ok: true });
@@ -45,7 +46,7 @@ export default async function handler(request: Request): Promise<Response> {
     if (body.email) updates.email = String(body.email).trim().toLowerCase();
     if (body.password) updates.password = String(body.password);
     if (body.role) updates.app_metadata = { role: body.role === "admin" ? "admin" : "moderator" };
-    if (body.display_name) updates.user_metadata = { display_name: String(body.display_name) };
+    if (body.display_name !== undefined) updates.user_metadata = { display_name: String(body.display_name).trim() };
     const { data, error } = await admin.auth.admin.updateUserById(id, updates);
     if (error) return json({ error: error.message }, 400);
     return json({ user: data.user });
