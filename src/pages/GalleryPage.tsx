@@ -12,11 +12,7 @@ const GalleryPage = () => {
   const [limit, setLimit] = useState(18);
   const [signedGalleryUrls, setSignedGalleryUrls] = useState<Record<string, string>>({});
 
-  const videos = [
-    { id: 1, thumbnail: "https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800", title: "Introduction to Club", duration: "5:30" },
-    { id: 2, thumbnail: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800", title: "Workshop Highlights", duration: "8:45" },
-    { id: 3, thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800", title: "Research Talk", duration: "12:20" },
-  ];
+  const videos: { id: number; thumbnail: string; title: string; duration: string }[] = [];
 
   const { data: gallery, isLoading: galleryLoading, error: galleryError } = useSupabaseList<{
     id: number;
