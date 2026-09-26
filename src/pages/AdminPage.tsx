@@ -530,13 +530,13 @@ const AdminPage = () => {
   }, [loadRows, loadCounts]);
 
   return (
-      <div className={isAdminApp ? "min-h-screen bg-[#07111f] text-slate-100" : "min-h-screen"}>
+      <div className={isAdminApp ? "min-h-screen bg-[#07111f] pl-0 text-slate-100 lg:pl-64" : "min-h-screen"}>
       {!isAdminApp && <Navigation />}
       {!isAdminApp && <FloatingActions />}
 
      
 
-      <section className={isAdminApp ? "min-h-[calc(100vh-4rem)] px-4 py-6 lg:px-8" : "py-16"}>
+      <section className={isAdminApp ? "min-h-screen px-4 pb-6 pt-24 lg:px-8" : "py-16"}>
         <div className={isAdminApp ? "mx-auto max-w-[1600px]" : "container mx-auto px-4"}>
           {isAdminApp ? (
             <>
@@ -591,7 +591,7 @@ const AdminPage = () => {
                 <Tabs value={active} onValueChange={(v) => setActive(v as Entity)}>
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                     {/* Sidebar */}
-                    <aside className="md:col-span-3 lg:col-span-2 sticky top-24">
+                    <aside className="fixed bottom-0 left-0 top-16 z-40 hidden w-64 border-r border-white/10 bg-[#081321] lg:block">
                       <Card className="border-white/10 bg-[#0c1a2b] shadow-xl shadow-black/20">
                         <CardHeader>
                           <div><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Workspace</p><CardTitle className="mt-2 text-base text-white">Content sections</CardTitle></div>
@@ -632,7 +632,7 @@ const AdminPage = () => {
                     </aside>
 
                     {/* Main */}
-                    <div className="md:col-span-9 lg:col-span-10 w-full">
+                    <div className="w-full lg:col-span-10 lg:col-start-3">
                       <Card className="border-white/10 bg-[#0c1a2b] shadow-xl shadow-black/20">
                         <CardHeader className="border-b border-white/10">
                           <CardTitle className="text-white">Content management</CardTitle>
@@ -917,8 +917,8 @@ const AdminPage = () => {
                   </div>
                 </Tabs>
               )}
-              <footer className="mt-8 flex flex-col gap-2 border-t border-white/10 pt-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-                <span>Bioinformatics Club PSTU Admin</span><span>Secure content operations · Supabase connected</span>
+              <footer className="mt-10 border-t border-white/10 py-4 text-center text-xs text-slate-500">
+                Bioinformatics Club PSTU · Admin workspace
               </footer>
             </>
           ) : (
@@ -1068,7 +1068,7 @@ const AdminPage = () => {
         </div>
       </section>
 
-      <Footer />
+      {!isAdminApp && <Footer />}
     </div>
   );
 };

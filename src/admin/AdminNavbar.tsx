@@ -36,7 +36,7 @@ const AdminNavbar = () => {
   const initials = (sessionEmail || "").slice(0, 2).toUpperCase() || "AD";
 
   return (
-    <header className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-border">
+    <header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-white/10 bg-[#081321]/95 backdrop-blur-xl">
       <div className="px-4 w-full h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-card flex items-center justify-center shadow">
