@@ -1,41 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Building2, GraduationCap, Globe, Microscope } from "lucide-react";
-import cfTechLogo from "@/assets/partner/cftech.png";
+import { useSupabaseList } from "@/hooks/useSupabaseList";
 
 const Partners = () => {
-  const partners = [
-    {
-      name: "CF TechLab",
-      type: "Tech Partner",
-      description: "Technology partner supporting design and development",
-      logo: cfTechLogo,
-      url: "https://cftechlab.hcsarker.me",
-    },
-    {
-      name: "PSTU Research Center",
-      type: "Academic Partner",
-      icon: GraduationCap,
-      description: "Collaborative research initiatives and lab facilities"
-    },
-    {
-      name: "National Bioinformatics Institute",
-      type: "Knowledge Partner",
-      icon: Microscope,
-      description: "Training programs and certification courses"
-    },
-    {
-      name: "Tech4Bio Solutions",
-      type: "Industry Partner",
-      icon: Building2,
-      description: "Internship opportunities and career guidance"
-    },
-    {
-      name: "Global Genomics Network",
-      type: "International Partner",
-      icon: Globe,
-      description: "International collaborations and exchange programs"
-    }
-  ];
+  const { data: partners = [] } = useSupabaseList<any>("partners", { orderBy: "id", ascending: true });
+
 
   return (
     <section className="py-20 bg-background">
