@@ -16,10 +16,18 @@ import MentorshipPage from "./pages/MentorshipPage";
 import FoundingPage from "./pages/FoundingPage";
 import CoursesPage from "./pages/CoursesPage";
 import AdminPage from "./pages/AdminPage";
+import AdminNavbar from "./admin/AdminNavbar";
 import NotFound from "./pages/NotFound";
 import JoinPage from "./pages/JoinPage";
 
 const queryClient = new QueryClient();
+
+const AdminRoute = () => (
+  <>
+    <AdminNavbar />
+    <AdminPage />
+  </>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -41,7 +49,7 @@ const App = () => (
           <Route path="/founding" element={<FoundingPage />} />
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/join" element={<JoinPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin" element={<AdminRoute />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
