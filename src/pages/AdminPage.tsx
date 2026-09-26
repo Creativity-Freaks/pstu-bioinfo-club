@@ -1,5 +1,4 @@
 import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import FloatingActions from "@/components/FloatingActions";
 // AdminNavbar is rendered at the app root in admin/main.tsx
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -536,7 +535,7 @@ const AdminPage = () => {
 
      
 
-      <section className={isAdminApp ? "min-h-screen px-4 pb-6 pt-24 lg:px-8" : "py-16"}>
+      <section className={isAdminApp ? "min-h-screen px-4 pb-6 pt-20 lg:px-8" : "py-16"}>
         <div className={isAdminApp ? "mx-auto max-w-[1600px]" : "container mx-auto px-4"}>
           {isAdminApp ? (
             <>
@@ -591,17 +590,15 @@ const AdminPage = () => {
                 <Tabs value={active} onValueChange={(v) => setActive(v as Entity)}>
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                     {/* Sidebar */}
-                    <aside className="fixed bottom-0 left-0 top-16 z-40 hidden w-64 border-r border-slate-800/80 bg-[#0b0d12] lg:block">
-                      <Card className="border-slate-800/80 bg-[#111318] shadow-xl shadow-black/30">
-                        <CardHeader>
-                          <div><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Workspace</p><CardTitle className="mt-2 text-base text-white">Content sections</CardTitle></div>
-                        </CardHeader>
-                        <CardContent className="space-y-1">
+                    <aside className="fixed bottom-0 left-0 top-16 z-40 hidden w-64 border-r border-white/[0.07] bg-[#0b0d12] lg:block">
+                      <div className="flex h-full flex-col px-4 py-6">
+                        <div className="mb-7 px-3"><p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">Workspace</p><p className="mt-2 text-sm font-semibold text-slate-200">Club administration</p></div>
+                        <div className="space-y-1">
                           {[
                             { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
                             { key: "courses", label: "Courses", icon: BookOpen },
                             { key: "events", label: "Events", icon: CalendarDays },
-                            { key: "team_members", label: "Team", icon: Users },
+                            { key: "team_members", label: "Team & moderators", icon: Users },
                             { key: "gallery_items", label: "Gallery", icon: Images },
                             { key: "blog_posts", label: "Blog", icon: FileText },
                             { key: "memberships", label: "Memberships", icon: IdCard },
@@ -627,17 +624,22 @@ const AdminPage = () => {
                               </button>
                             );
                           })}
-                        </CardContent>
-                      </Card>
+                        </div>
+                        <div className="mt-auto border-t border-white/[0.07] pt-4">
+                          <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("admin:edit-profile"))} className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-slate-400 transition-colors hover:bg-white/[0.05] hover:text-white">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-400/10 text-xs font-semibold text-cyan-200">AD</div>
+                            <div className="min-w-0"><p className="truncate text-xs font-medium text-slate-200">Admin profile</p><p className="text-[11px] text-slate-500">Account settings</p></div>
+                          </button>
+                        </div>
+                      </div>
                     </aside>
 
                     {/* Main */}
                     <div className="w-full lg:col-span-10 lg:col-start-3">
-                      <Card className="border-slate-800/80 bg-[#111318] shadow-xl shadow-black/30">
-                        <CardHeader className="border-b border-white/10">
-                          <CardTitle className="text-white">Content management</CardTitle>
-                        </CardHeader>
-                        <CardContent>
+                      <div className="mb-6 flex items-end justify-between border-b border-white/[0.08] pb-5">
+                        <div><p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">Control center</p><h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">Content management</h2></div>
+                        <span className="hidden text-xs text-slate-500 sm:block">Live Supabase workspace</span>
+                      </div>
                           {/* Dashboard Overview */}
                           <TabsContent value="dashboard">
                             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -911,8 +913,6 @@ const AdminPage = () => {
                               </Card>
                             </div>
                           </TabsContent>
-                        </CardContent>
-                      </Card>
                     </div>
                   </div>
                 </Tabs>
