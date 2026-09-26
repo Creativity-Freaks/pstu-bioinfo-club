@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Quote } from "lucide-react";
+import { useSupabaseList } from "@/hooks/useSupabaseList";
 import {
   Carousel,
   CarouselContent,
@@ -9,38 +10,11 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-const testimonials = [
-  {
-    name: "Sarah Ahmed",
-    role: "Computer Science, 3rd Year",
-    avatar: "/placeholder.svg",
-    content: "Joining this club was the best decision of my university life. The workshops and mentorship programs have significantly improved my technical skills and confidence.",
-    rating: 5,
-  },
-  {
-    name: "Michael Chen",
-    role: "Software Engineering, 2nd Year",
-    avatar: "/placeholder.svg",
-    content: "The community here is amazing! I've learned so much from the senior members and the hands-on projects. It's helped me secure multiple internship opportunities.",
-    rating: 5,
-  },
-  {
-    name: "Priya Patel",
-    role: "Information Systems, 4th Year",
-    avatar: "/placeholder.svg",
-    content: "The networking events and industry connections through this club opened doors I never knew existed. Highly recommend to anyone serious about tech.",
-    rating: 5,
-  },
-  {
-    name: "James Wilson",
-    role: "Data Science, 3rd Year",
-    avatar: "/placeholder.svg",
-    content: "From hackathons to study groups, this club offers everything you need to excel. The supportive environment makes learning enjoyable and effective.",
-    rating: 5,
-  },
-];
+const testimonials: any[] = [];
+
 
 const Testimonials = () => {
+  const { data: testimonials = [] } = useSupabaseList<any>("testimonials", { orderBy: "id", ascending: true });
   return (
     <section className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">

@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, BookOpen, CalendarDays, CheckCircle2, Images, FileText, IdCard, LayoutDashboard, LockKeyhole, Mail, ShieldCheck, Users, UserCog } from "lucide-react";
 import { AdminProfileDialog, AdminUsersPanel } from "@/admin/AdminManagement";
 
-type Entity = "dashboard" | "courses" | "events" | "team_members" | "gallery_items" | "blog_posts" | "memberships" | "contact_messages" | "users";
+type Entity = "dashboard" | "courses" | "events" | "team_members" | "gallery_items" | "blog_posts" | "memberships" | "contact_messages" | "faqs" | "testimonials" | "partners" | "about_sections" | "users";
 
 type Row = { id?: number } & Record<string, unknown>;
 
@@ -223,6 +223,10 @@ const AdminPage = () => {
     blog_posts: ["title", "slug", "author", "category", "image_url", "excerpt", "content"],
     memberships: ["name", "email", "student_id", "department", "year", "phone", "bio", "skills", "photo_url"],
     contact_messages: ["name", "email", "student_id", "message"],
+  faqs: ["question", "answer", "sort_order"],
+  testimonials: ["name", "role", "content", "avatar_url", "rating"],
+  partners: ["name", "type", "description", "logo_url", "url"],
+  about_sections: ["section_key", "title", "content", "image_url", "sort_order"],
   };
 
   const loadRows = useCallback(async () => {
@@ -289,7 +293,7 @@ const AdminPage = () => {
       if (!isAuthorized) return;
       if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) return;
 
-      const all: Entity[] = ["courses", "events", "team_members", "gallery_items", "blog_posts", "memberships", "contact_messages"];
+      const all: Entity[] = ["courses", "events", "team_members", "gallery_items", "blog_posts", "memberships", "contact_messages", "faqs", "testimonials", "partners", "about_sections"];
       const entities: Entity[] =
         mode === "all" ? all : active === "dashboard" ? [] : [active];
 
@@ -596,6 +600,10 @@ const AdminPage = () => {
                             { key: "blog_posts", label: "Blog", icon: FileText },
                             { key: "memberships", label: "Memberships", icon: IdCard },
                             { key: "contact_messages", label: "Contact Messages", icon: Mail },
+  { key: "faqs", label: "FAQ", icon: FileText },
+  { key: "testimonials", label: "Testimonials", icon: Users },
+  { key: "partners", label: "Partners", icon: Users },
+  { key: "about_sections", label: "About page", icon: FileText },
   { key: "users", label: "Users & roles", icon: UserCog },
                           ].map((item) => {
                             const Icon = item.icon as ElementType;
@@ -646,6 +654,10 @@ const AdminPage = () => {
                                 { label: "Blog Posts", key: "blog_posts" as Entity },
                                 { label: "Memberships", key: "memberships" as Entity },
                                 { label: "Contact Messages", key: "contact_messages" as Entity },
+  { label: "FAQ", key: "faqs" as Entity },
+  { label: "Testimonials", key: "testimonials" as Entity },
+  { label: "Partners", key: "partners" as Entity },
+  { label: "About Sections", key: "about_sections" as Entity },
                               ].map((card) => (
                                 <Card key={card.key}>
                                   <CardHeader>
@@ -661,7 +673,7 @@ const AdminPage = () => {
                               ))}
                             </div>
                           </TabsContent>
-                          {(["courses", "events", "team_members", "gallery_items", "blog_posts", "contact_messages"] as Entity[]).map((e) => (
+                          {(["courses", "events", "team_members", "gallery_items", "blog_posts", "contact_messages", "faqs", "testimonials", "partners", "about_sections"] as Entity[]).map((e) => (
                             <TabsContent key={e} value={e}>
                               <div className="grid md:grid-cols-3 gap-6 mt-0">
                                 <Card className="md:col-span-1">
@@ -958,8 +970,12 @@ const AdminPage = () => {
                       <TabsTrigger value="blog_posts">Blog</TabsTrigger>
                       <TabsTrigger value="memberships">Memberships</TabsTrigger>
                       <TabsTrigger value="contact_messages">Contact Messages</TabsTrigger>
+  <TabsTrigger value="faqs">FAQ</TabsTrigger>
+  <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
+  <TabsTrigger value="partners">Partners</TabsTrigger>
+  <TabsTrigger value="about_sections">About</TabsTrigger>
                     </TabsList>
-                    {(["courses", "events", "team_members", "gallery_items", "blog_posts", "contact_messages"] as Entity[]).map((e) => (
+                    {(["courses", "events", "team_members", "gallery_items", "blog_posts", "contact_messages", "faqs", "testimonials", "partners", "about_sections"] as Entity[]).map((e) => (
                       <TabsContent key={e} value={e}>
                         <div className="grid md:grid-cols-3 gap-6 mt-6">
                           <Card className="md:col-span-1">

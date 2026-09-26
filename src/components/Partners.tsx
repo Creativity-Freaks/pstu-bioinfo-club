@@ -1,41 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Building2, GraduationCap, Globe, Microscope } from "lucide-react";
-import cfTechLogo from "@/assets/partner/cftech.png";
+import { useSupabaseList } from "@/hooks/useSupabaseList";
 
 const Partners = () => {
-  const partners = [
-    {
-      name: "CF TechLab",
-      type: "Tech Partner",
-      description: "Technology partner supporting design and development",
-      logo: cfTechLogo,
-      url: "https://cftechlab.hcsarker.me",
-    },
-    {
-      name: "PSTU Research Center",
-      type: "Academic Partner",
-      icon: GraduationCap,
-      description: "Collaborative research initiatives and lab facilities"
-    },
-    {
-      name: "National Bioinformatics Institute",
-      type: "Knowledge Partner",
-      icon: Microscope,
-      description: "Training programs and certification courses"
-    },
-    {
-      name: "Tech4Bio Solutions",
-      type: "Industry Partner",
-      icon: Building2,
-      description: "Internship opportunities and career guidance"
-    },
-    {
-      name: "Global Genomics Network",
-      type: "International Partner",
-      icon: Globe,
-      description: "International collaborations and exchange programs"
-    }
-  ];
+  const { data: partners = [] } = useSupabaseList<any>("partners", { orderBy: "id", ascending: true });
+
 
   return (
     <section className="py-20 bg-background">
@@ -51,7 +20,8 @@ const Partners = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {partners.map((partner, index) => {
-            const Icon = partner.icon;
+            const Icon = typeof partner.icon === "function" ? partner.icon : null;
+            const logoUrl = partner.logo_url || partner.logo;
             return (
               <Card
                 key={index}
@@ -60,8 +30,8 @@ const Partners = () => {
               >
                 <CardContent className="p-6 text-center">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110 overflow-hidden">
-                    {partner.logo ? (
-                      <img src={partner.logo} alt={partner.name} className="w-full h-full object-cover" />
+                    {logoUrl ? (
+                      <img src={logoUrl} alt={partner.name} className="w-full h-full object-cover" />
                     ) : (
                       Icon ? <Icon className="w-8 h-8 text-primary-foreground group-hover:animate-float" /> : null
                     )}
