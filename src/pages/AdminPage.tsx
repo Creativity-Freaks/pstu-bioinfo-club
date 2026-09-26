@@ -591,8 +591,8 @@ const AdminPage = () => {
                 <Tabs value={active} onValueChange={(v) => setActive(v as Entity)}>
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                     {/* Sidebar */}
-                    <aside className="fixed bottom-0 left-0 top-16 z-40 hidden w-64 border-r border-white/10 bg-[#081321] lg:block">
-                      <Card className="border-white/10 bg-[#0c1a2b] shadow-xl shadow-black/20">
+                    <aside className="fixed bottom-0 left-0 top-16 z-40 hidden w-64 border-r border-slate-800/80 bg-[#0b0d12] lg:block">
+                      <Card className="border-slate-800/80 bg-[#111318] shadow-xl shadow-black/30">
                         <CardHeader>
                           <div><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Workspace</p><CardTitle className="mt-2 text-base text-white">Content sections</CardTitle></div>
                         </CardHeader>
@@ -633,7 +633,7 @@ const AdminPage = () => {
 
                     {/* Main */}
                     <div className="w-full lg:col-span-10 lg:col-start-3">
-                      <Card className="border-white/10 bg-[#0c1a2b] shadow-xl shadow-black/20">
+                      <Card className="border-slate-800/80 bg-[#111318] shadow-xl shadow-black/30">
                         <CardHeader className="border-b border-white/10">
                           <CardTitle className="text-white">Content management</CardTitle>
                         </CardHeader>
@@ -917,8 +917,8 @@ const AdminPage = () => {
                   </div>
                 </Tabs>
               )}
-              <footer className="mt-10 border-t border-white/10 py-4 text-center text-xs text-slate-500">
-                Bioinformatics Club PSTU · Admin workspace
+              <footer className="mt-8 border-t border-slate-800/80 py-4 text-center text-[11px] text-slate-600">
+                Admin workspace · PSTU Bioinformatics Club
               </footer>
             </>
           ) : (
